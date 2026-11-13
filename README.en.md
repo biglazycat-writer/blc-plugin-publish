@@ -9,7 +9,7 @@ This is an independent npm project. The SDK comes from the verified tgz included
 | Item | Value |
 | --- | --- |
 | Plugin ID / package | `blc-plugin-publish` |
-| Plugin version | `0.2.0` |
+| Plugin version | `0.2.1` |
 | Host API | `biglazycat.apiVersion = 1`, `minimumApiRevision = 2` |
 | SDK | `vendor/blc-plugin-sdk-1.2.0.tgz` (verified candidate artifact) |
 | Runtime | Node `>=22.23.3 <23.0.0`, configured by the host |
@@ -81,6 +81,10 @@ The command palette contains only publishing and account settings. All commands 
 4. Run “Publish current article” from the editor/menu, choose a theme and cover, preview the result and create a draft.
 5. Review the draft in the WeChat account console and publish it manually.
 
+The view labels automatic persistence as a local publishing draft and offers a retry when saving fails. Local saving neither creates a remote WeChat draft nor overwrites the source article. Account settings keep their own save action.
+
+The updated desktop host provides “Return to original article”, saving the publishing draft before focusing the original tab. Failed saves keep the publishing view open. The redundant toolbar save button is removed; keyboard, close and reload saves remain available.
+
 ## Develop from source
 
 Use Node `>=22.23.3 <23.0.0`, npm `>=10.9.9 <11.0.0` and a host supporting API 1 revision 2. The host checks the actual selected Node against `engines.node`; native dependencies still need validation on each target system.
@@ -135,6 +139,8 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) and [CHANGELOG.md](CHANGELOG.md), current
 
 The [SDK](https://github.com/biglazycat-writer/blc-plugin-sdk) is MIT licensed. Licensing for the rest of this repository has not been specified by its maintainer; do not assume the entire project uses the SDK's license.
 
-## 0.2.0 host requirements
+## 0.2.1 host requirements
 
 Requires host API 1 revision 2. The UI follows the resolved host light/dark mode; exported article styling remains independent. Only publishing and account settings appear in the command palette. The verified SDK 1.2.0 tarball is included in vendor for independent builds and installation.
+
+The blank-page fix, return action and dismissal of successful page-opening task notifications are desktop host changes. Install a desktop build containing these changes alongside this plugin update.

@@ -166,7 +166,7 @@
     "test": "node --test tests/*.test.mjs && vitest run"
   },
   "type": "module",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "大懒猫创作平台微信公众号发布插件",
   "files": [
     "dist",

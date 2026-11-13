@@ -69,6 +69,51 @@ async function edit(text: string) {
 }
 
 describe('publishing view persistence', () => {
+  it('automatically saves edits and labels the result as a local publishing draft', async () => {
+    await mount(); vi.useFakeTimers();
+    expect(element.textContent).toContain('本地发布稿已保存');
+    await edit('edited article');
+    expect(element.textContent).toContain('正在保存本地发布稿');
+    expect(mocks.invoke).not.toHaveBeenCalled();
+    await act(async () => { await vi.advanceTimersByTimeAsync(700); });
+    expect(mocks.invoke).toHaveBeenCalledWith('article.save', { draftKey: 'view-one', transferId: 'payload-one' });
+    expect(element.textContent).toContain('本地发布稿已保存');
+    expect(element.textContent).not.toContain('草稿已保存');
+  });
+
+  it('reports an automatic save failure and retries the latest article from the page', async () => {
+    await mount(); vi.useFakeTimers(); await edit('unsaved article');
+    mocks.invoke.mockRejectedValueOnce(new Error('disk full'));
+    await act(async () => { await vi.advanceTimersByTimeAsync(700); });
+    expect(element.textContent).toContain('本地发布稿保存失败');
+    expect(element.querySelector('[role=alert]')?.textContent).toContain('disk full');
+    expect(element.querySelector('textarea')?.value).toBe('unsaved article');
+    expect(mocks.setState).toHaveBeenLastCalledWith({ draftKey: 'view-one', page: 'publish' }, true);
+    await edit('latest article');
+    await button('重试保存');
+    expect(mocks.transfer).toHaveBeenLastCalledWith({ articleText: 'latest article', publishTitle: 'saved title' });
+    expect(mocks.invoke).toHaveBeenCalledTimes(2);
+    expect(mocks.setState).toHaveBeenLastCalledWith({ draftKey: 'view-one', page: 'publish' }, false);
+    expect(element.querySelector('[role=alert]')).toBeNull();
+    expect(element.textContent).toContain('本地发布稿已保存');
+    expect([...element.querySelectorAll('button')].some(button => button.textContent === '重试保存')).toBe(false);
+    await act(async () => { await vi.advanceTimersByTimeAsync(1000); });
+    expect(mocks.invoke).toHaveBeenCalledTimes(2);
+  });
+
+  it('retries the host checkpoint without re-uploading an already saved local draft', async () => {
+    await mount(); vi.useFakeTimers(); await edit('edited article');
+    mocks.setState.mockRejectedValueOnce(new Error('checkpoint unavailable'));
+    await act(async () => { await vi.advanceTimersByTimeAsync(700); });
+    expect(element.querySelector('[role=alert]')?.textContent).toContain('checkpoint unavailable');
+    expect(mocks.invoke).toHaveBeenCalledTimes(1);
+    await button('重试保存');
+    expect(mocks.invoke).toHaveBeenCalledTimes(1);
+    expect(mocks.setState).toHaveBeenLastCalledWith({ draftKey: 'view-one', page: 'publish' }, false);
+    expect(element.querySelector('[role=alert]')).toBeNull();
+    expect(element.textContent).toContain('本地发布稿已保存');
+  });
+
   it('uses distinct view identities for independent publishing drafts', async () => {
     await mount();
     expect(mocks.readArticle).toHaveBeenLastCalledWith('view-one');

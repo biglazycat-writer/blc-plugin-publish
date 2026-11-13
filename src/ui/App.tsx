@@ -28,6 +28,7 @@ function App() {
   const currentPage = useRef(page);
   const [draft, setDraft] = useState<PublishDraft | null>(null);
   const [error, setError] = useState('');
+  const [saveError, setSaveError] = useState('');
   const [saved, setSaved] = useState(true);
   const [accountDirty, setAccountDirty] = useState(false);
   const latest = useRef<PublishDraft | null>(null);
@@ -61,6 +62,7 @@ function App() {
   const persist = useCallback(async () => {
     clearTimeout(timer.current);
     const task = queue.current.catch(() => {}).then(async () => {
+      setSaveError('');
       for (;;) {
         const value = latest.current;
         if (value && !articleSaved.current) {
@@ -76,7 +78,8 @@ function App() {
       }
     });
     queue.current = task;
-    await task;
+    try { await task; }
+    catch (e) { setSaved(false); setSaveError(String(e)); throw e; }
   }, []);
 
   const saveAll = useCallback(async () => {
@@ -91,9 +94,9 @@ function App() {
     latest.current = value;
     articleSaved.current = false;
     setSaved(false);
-    void sdk.setState({ draftKey, page: currentPage.current }, true).catch(e => setError(String(e)));
+    void sdk.setState({ draftKey, page: currentPage.current }, true).catch(e => setSaveError(String(e)));
     clearTimeout(timer.current);
-    timer.current = setTimeout(() => { void persist().catch(e => setError(String(e))); }, 700);
+    timer.current = setTimeout(() => { void persist().catch(() => {}); }, 700);
   }, [persist]);
 
   const accountChanged = useCallback((dirty: boolean) => {
@@ -121,9 +124,11 @@ function App() {
         <button aria-current={page === 'settings' ? 'page' : undefined} onClick={() => void navigate('settings')}>账号设置</button>
       </nav>
       {page === 'publish' && <Suspense fallback={null}><ThemePicker /></Suspense>}
-      <small role="status">{accountDirty ? '账号设置未保存' : saved ? '草稿已保存' : '正在保存…'}</small>
+      {(draft || page === 'settings') && <small role="status">{saveError ? '本地发布稿保存失败' : accountDirty ? '账号设置未保存' : page === 'settings' ? '账号设置已保存' : saved ? '本地发布稿已保存' : '正在保存本地发布稿…'}</small>}
+      {saveError && <button onClick={() => void persist().catch(() => {})}>重试保存</button>}
     </header>
     {error && <p role="alert" className="settingsErr">{error}</p>}
+    {saveError && <p role="alert" className="settingsErr">本地发布稿未能保存：{saveError}</p>}
     <Suspense fallback={<p role="status">正在加载页面…</p>}>{page === 'settings'
       ? <div className="accountSettings"><WeChatMPPanel ref={account} onDirtyChange={accountChanged} /></div>
       : draft
