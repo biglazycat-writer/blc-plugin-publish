@@ -50,7 +50,7 @@
 
 ```
 浏览器视图 (src/ui, React + Vite)
-   │  @biglazycat/plugin-sdk/browser  →  connect() / commands.invoke / tasks.get
+   │  blc-plugin-sdk/browser  →  connect() / commands.invoke / tasks.get
    │  分段桥接：transfer.put → article.save / article.read → draft.create
    ▼
 后台插件进程 (src/main.ts + src/wechat.ts, Node ESM)
@@ -77,7 +77,6 @@
 │     ├─ themes/                 10 套排版主题 CSS
 │     └─ i18n/                   zh-CN / en-US 文案资源
 ├─ tests/wechat.test.mjs          后台集成测试（本地模拟微信服务器）
-├─ vendor/plugin-sdk/            SDK v1 物理副本（含 LICENSE、schema、说明）
 ├─ dist/                         构建产物（不提交）
 ├─ package.json / package-lock.json
 └─ vite.config.mjs / tsconfig*.json
@@ -118,13 +117,15 @@
 需要 Node 22.x 与大懒猫创作平台（提供插件 SDK 与运行环境）。清单 `engines.node` 固定声明 `22.23.3`，宿主的平台准备流程会校验这个版本；本机开发用相近的 22.x（例如 22.22.x）也能正常构建和测试。
 
 ```bash
-npm install          # .npmrc 的 install-links=true 会把本地 SDK 装成物理副本
+npm install          # 从 npm 安装 blc-plugin-sdk@1.0.0 及其余依赖
 npm run typecheck    # 前后台两份 tsconfig 的严格类型检查
 npm run build        # tsc -p tsconfig.node.json && vite build
 npm test             # node --test tests/*.test.mjs && vitest run
 ```
 
 `npm run build` 生成 `dist/main.js`、`dist/wechat.js` 与 `dist/ui/`；`dist/` 与 `node_modules/` 都不进版本库，`package-lock.json` 需要提交。
+
+> 首次 `npm install` 会从 npm registry 拉取 `blc-plugin-sdk`，需要联网；宿主平台准备流程按 `package-lock.json` 执行 `npm ci`。
 
 ### 方式三：外部 AI / MCP 开发
 
@@ -161,7 +162,7 @@ npm test             # node --test tests/*.test.mjs && vitest run
 
 ## 约束与已知限制
 
-- 不提交构建产物和依赖：`dist/`、`node_modules/`、`coverage/` 均被忽略；`vendor/plugin-sdk` 作为物理副本随仓库提交。
+- 不提交构建产物和依赖：`dist/`、`node_modules/`、`coverage/` 均被忽略；SDK 由 npm 包 `blc-plugin-sdk@1.0.0` 提供，`package-lock.json` 锁定版本。
 - 单次命令结果受 SDK 的 1 MiB 限制；大于此值的内容必须走 `transfer.put` 分段协议。
 - 需要公众号完成微信认证且出口 IP 在白名单内；网络不通时可通过代理地址排查。
 - 封面与正文图片走微信接口上传，受微信侧体积/格式与调用频次限制，超出会返回明确错误。
@@ -176,4 +177,4 @@ npm test             # node --test tests/*.test.mjs && vitest run
 
 ## 许可证
 
-`vendor/plugin-sdk` 自带其 [LICENSE](vendor/plugin-sdk/LICENSE)。本仓库其余部分的授权方式待维护者确认，请勿默认按开源许可证使用。
+SDK 包 [blc-plugin-sdk](https://github.com/biglazycat-writer/blc-plugin-sdk) 为 MIT。本仓库其余部分的授权方式待维护者确认，请勿默认按开源许可证使用。

@@ -1,4 +1,4 @@
-import {definePlugin, type Json, type PluginContext, type Invocation} from '@biglazycat/plugin-sdk';
+import {definePlugin, type Json, type PluginContext, type Invocation} from 'blc-plugin-sdk';
 import {mkdir,readFile,writeFile,rename} from 'node:fs/promises';
 import path from 'node:path';
 import {createHash,randomUUID} from 'node:crypto';

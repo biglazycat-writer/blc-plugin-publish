@@ -1,5 +1,5 @@
-import {connect} from '@biglazycat/plugin-sdk/browser';
-import type {Json} from '@biglazycat/plugin-sdk';
+import {connect} from 'blc-plugin-sdk/browser';
+import type {Json} from 'blc-plugin-sdk';
 import type {WeChatMPConfig,WeChatMPDraftInput,WeChatMPDraftResult,WeChatMPEgressIP,WeChatMPMaterialPage} from '../types/models';
 export const sdk=await connect();
 export async function invoke<T=unknown>(command:string,args:Json={}):Promise<T>{
