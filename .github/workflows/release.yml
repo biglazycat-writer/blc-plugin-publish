@@ -87,15 +87,32 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAG: ${{ steps.meta.outputs.tag }}
+          VERSION: ${{ steps.meta.outputs.version }}
         run: |
+          # Release notes 取自 CHANGELOG 中对应版本的段落，末尾补提交对比链接。
+          NOTES="release-notes.md"
+          awk -v v="$VERSION" '
+            $0 ~ "^## \\[" v "\\]" {flag=1; next}
+            flag && /^## \[/ {exit}
+            flag {print}
+          ' CHANGELOG.md > "$NOTES.raw"
+          {
+            cat "$NOTES.raw"
+            echo
+            echo "**Full Changelog**: https://github.com/$GITHUB_REPOSITORY/commits/$TAG"
+          } > "$NOTES"
+          echo "=== release notes ==="
+          head -20 "$NOTES"
+
           if gh release view "$TAG" >/dev/null 2>&1; then
-            echo "Release $TAG exists; uploading assets."
+            echo "Release $TAG exists; updating assets and notes."
             gh release upload "$TAG" blc-plugin-publish-*.tar.gz blc-plugin-publish-*.tar.gz.sha256 --clobber
+            gh release edit "$TAG" --notes-file "$NOTES"
           else
             echo "Creating Release $TAG."
             gh release create "$TAG" \
               blc-plugin-publish-*.tar.gz blc-plugin-publish-*.tar.gz.sha256 \
               --title "blc-plugin-publish $TAG" \
-              --generate-notes
+              --notes-file "$NOTES"
           fi
           gh release view "$TAG" --json tagName,url,assets

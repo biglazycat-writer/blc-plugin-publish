@@ -181,7 +181,7 @@ npm test             # node --test tests/*.test.mjs && vitest run
 
 1. 更新 `package.json` 的 `version`，在 `CHANGELOG.md` 里补对应段落，提交并推送到 `main`。
 2. 打标签并推送：`git tag -a v0.1.0 -m "blc-plugin-publish 0.1.0" && git push origin v0.1.0`。
-3. 工作流自动执行 `npm ci` → `typecheck` → `build` → `test`，然后创建（或更新）GitHub Release，附上 `blc-plugin-publish-<version>.tar.gz` 与 `.sha256` 校验文件，Release notes 自动生成。
+3. 工作流自动执行 `npm ci` → `typecheck` → `build` → `test`，然后创建（或更新）GitHub Release，附上 `blc-plugin-publish-<version>.tar.gz` 与 `.sha256` 校验文件；Release notes 从 `CHANGELOG.md` 中该版本段落提取，末尾附提交对比链接。
 
 约束与说明：
 
