@@ -2,6 +2,13 @@
 
 本文件记录 `blc-plugin-publish` 的 notable 变更，格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本号遵循语义化版本。
 
+## [Unreleased]
+
+- 升级至公开 SDK 1.1.0；用宿主 Markdown 分块导出读取文章，声明 API 1 修订 1。
+- 页面任务改为限时等待，保留结构化错误，不自动重放外部操作。
+- 独立发布稿/传输存储模块，新增文档导出与等待测试。
+- 增加完整中英文 README；页面构建目标明确为 ES2022 / Chromium 109 / Safari 16.4。
+
 ## [0.1.0] - 2026-11-13
 
 首个公开版本：面向大懒猫创作平台的微信公众号发布插件（SDK API v1）。

@@ -8,7 +8,6 @@ import common from './i18n/zh-CN/common.json';
 import { WeChatPublishModal, type PublishDraft } from './features/writing/modals/WeChatPublishModal';
 import { WeChatMPPanel, type WeChatMPPanelHandle } from './features/settings/WeChatMPPanel';
 import { sdk, invoke, transfer, readArticle } from './bridge/publishing-api';
-import { docToMarkdown, storedDocFromRaw } from './lib/content-model';
 import { useThemes } from './lib/editor-themes/theme-store';
 import { setThemeId, useThemeId } from './lib/theme';
 import './style.css';
@@ -40,7 +39,7 @@ function App() {
 
   useEffect(() => {
     void readArticle<PublishDraft & { format?: string }>(draftKey).then(value => {
-      if (value.format === 'tiptap') value.articleText = docToMarkdown(storedDocFromRaw(value.articleText));
+      if (value.format && value.format !== 'markdown') throw new Error('发布稿需要 Markdown 格式，请从原文重新打开发布');
       setDraft(value);
       latest.current = value;
     }).catch(e => setError(String(e)));

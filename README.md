@@ -1,15 +1,17 @@
 # 微信公众号发布 · 大懒猫创作平台插件
 
+**简体中文** | [English](README.en.md)
+
 [大懒猫创作平台](https://github.com/biglazycat-writer) 的官方 API 版公众号发布插件。把编辑器里的文章排版成符合微信公众号要求的 HTML，处理正文图片与封面，通过公众号官方接口创建**草稿**；最终发表仍由作者在公众号后台人工确认，插件不群发、不公开发表。
 
-本仓库是一个**独立的 npm 工程**：SDK、排版代码、主题和测试都是本工程内的物理副本，不引用、不软链接、不依赖桌面端源码。
+本仓库是一个**独立的 npm 工程**：SDK 通过 npm 安装，排版代码、主题和测试由本工程独立维护，不引用、不软链接、不依赖桌面端源码。
 
 | 项目 | 值 |
 | --- | --- |
 | 插件 ID / 包名 | `blc-plugin-publish` |
 | 版本 | `0.1.0` |
-| 插件 API | `biglazycat.apiVersion = 1` |
-| 运行环境 | Node `22.23.3`（宿主提供，安装包不内嵌 Node） |
+| 插件 API | `biglazycat.apiVersion = 1`、`minimumApiRevision = 1` |
+| 运行环境 | Node `>=22.23.3 <23.0.0`（宿主提供，安装包不内嵌 Node） |
 | 支持平台 | Windows amd64/arm64、macOS amd64/arm64、Linux amd64/arm64 |
 | UI 技术 | React 19 + TypeScript + Vite 7 + Vitest |
 
@@ -39,7 +41,7 @@
 
 **发布与草稿**
 
-- 从编辑器命令「发布当前文章」进入时，通过 `documents.snapshot` 读取当前文章快照作为插件自己的发布稿；也可直接粘贴 Markdown。
+- 从编辑器命令「发布当前文章」进入时，通过 `readDocument`（`documents.export`）读取当前文章快照作为插件自己的发布稿；也可直接粘贴 Markdown。
 - 编辑、封面和排版设置自动保存到插件私有数据（700 ms 防抖 + 宿主保存钩子），**不覆盖原文**。
 - 大稿件分段传输：96 KiB 分片、总量 ≤ 32 MiB、顺序校验、5 分钟过期、最多 4 个在途传输；读取时用 SHA-256 校验一致性，内容变更会拒绝续读。
 - 调用 `draft/add` 创建草稿，返回草稿 ID 与图片上传结果。标题 1–64 字符、摘要截断至 120 字符。
@@ -53,21 +55,21 @@
    │  blc-plugin-sdk/browser  →  connect() / commands.invoke / tasks.get
    │  分段桥接：transfer.put → article.save / article.read → draft.create
    ▼
-后台插件进程 (src/main.ts + src/wechat.ts, Node ESM)
+后台插件进程 (src/main.ts + src/publishing-store.ts + src/wechat.ts, Node ESM)
    │  definePlugin(ctx) 注册 11 个命令，ctx.credentials 存取密钥
    ▼
 微信公众号官方 API (api.weixin.qq.com，可走 HTTP(S) 代理)
 ```
 
 - `package.json` 的 `biglazycat` 字段是**唯一清单**：命令、菜单、视图、入口、平台都在这里声明。
-- 后台入口编译为 `dist/main.js` + `dist/wechat.js`；页面入口为 `dist/ui/index.html`（两个视图 `publish` / `settings` 共用一个 HTML，按路由切换）。
+- 后台入口编译为 `dist/main.js` + `dist/publishing-store.js` + `dist/wechat.js`；页面入口为 `dist/ui/index.html`（两个视图 `publish` / `settings` 共用一个 HTML，按路由切换）。
 - 宿主单次命令结果上限 1 MiB，因此所有大数据都走插件自己的分段协议，不塞进任务结果。
 
 ### 目录结构
 
 ```
 ├─ src/
-│  ├─ main.ts                     后台入口：命令注册、配置/凭据、发布稿存储、分段传输
+│  ├─ main.ts                     后台入口：命令注册、配置/凭据；publishing-store.ts 负责发布稿与传输
 │  ├─ wechat.ts                   微信 API 客户端：token、图片、素材、草稿、错误脱敏
 │  └─ ui/
 │     ├─ main.tsx / index.html    页面入口与视图状态
@@ -114,18 +116,18 @@
 
 ### 方式二：从源码开发
 
-需要 Node 22.x 与大懒猫创作平台（提供插件 SDK 与运行环境）。清单 `engines.node` 固定声明 `22.23.3`，宿主的平台准备流程会校验这个版本；本机开发用相近的 22.x（例如 22.22.x）也能正常构建和测试。
+需要 Node >=22.23.3 <23.0.0 与大懒猫创作平台 API 1 修订 1。宿主按选定运行时的实际版本校验 engines；公众号插件的原生依赖仍须在目标系统验证。
 
 ```bash
-npm install          # 从 npm 安装 blc-plugin-sdk@1.0.0 及其余依赖
+npm ci               # 从锁文件安装公开 SDK 1.1.0 与其余依赖
 npm run typecheck    # 前后台两份 tsconfig 的严格类型检查
 npm run build        # tsc -p tsconfig.node.json && vite build
 npm test             # node --test tests/*.test.mjs && vitest run
 ```
 
-`npm run build` 生成 `dist/main.js`、`dist/wechat.js` 与 `dist/ui/`；`dist/` 与 `node_modules/` 都不进版本库，`package-lock.json` 需要提交。
+`npm run build` 生成 `dist/main.js`、`dist/publishing-store.js`、`dist/wechat.js` 与 `dist/ui/`；`dist/` 与 `node_modules/` 都不进版本库，`package-lock.json` 需要提交。
 
-> 首次 `npm install` 会从 npm registry 拉取 `blc-plugin-sdk`，需要联网；宿主平台准备流程按 `package-lock.json` 执行 `npm ci`。
+> SDK 固定使用公开 npm 包 `blc-plugin-sdk@1.1.0`，首次安装需要访问 npm registry。宿主准备流程按 `package-lock.json` 执行 `npm ci`。
 
 ### 方式三：外部 AI / MCP 开发
 
@@ -162,12 +164,12 @@ npm test             # node --test tests/*.test.mjs && vitest run
 
 ## 约束与已知限制
 
-- 不提交构建产物和依赖：`dist/`、`node_modules/`、`coverage/` 均被忽略；SDK 由 npm 包 `blc-plugin-sdk@1.0.0` 提供，`package-lock.json` 锁定版本。
+- 不提交构建产物和依赖：`dist/`、`node_modules/`、`coverage/` 均被忽略；SDK 固定为 `blc-plugin-sdk@1.1.0`，由 npm registry 和锁文件分发。
 - 单次命令结果受 SDK 的 1 MiB 限制；大于此值的内容必须走 `transfer.put` 分段协议。
 - 需要公众号完成微信认证且出口 IP 在白名单内；网络不通时可通过代理地址排查。
 - 封面与正文图片走微信接口上传，受微信侧体积/格式与调用频次限制，超出会返回明确错误。
 - 插件只创建草稿，**不提供群发/定时发表**能力。
-- 仓库内容为中文文档优先，`i18n` 内已备有中英文文案资源。
+- README 提供完整中英文版本；`i18n` 内已有中英文文案资源，当前页面默认语言仍为中文。
 
 ---
 
@@ -178,3 +180,9 @@ npm test             # node --test tests/*.test.mjs && vitest run
 ## 许可证
 
 SDK 包 [blc-plugin-sdk](https://github.com/biglazycat-writer/blc-plugin-sdk) 为 MIT。本仓库其余部分的授权方式待维护者确认，请勿默认按开源许可证使用。
+
+## SDK 与平台支持
+
+本工程固定使用 npm 包 `blc-plugin-sdk@1.1.0`。页面调用通过 `waitForTask` 有限等待；超时后查询现有任务，不自动重新提交有副作用的操作。
+
+构建目标为 ES2022 / Chromium 109 / Safari 16.4。当前更新在 Windows amd64 完成测试；平台声明与编译目标不代表所有系统 WebView、原生依赖均已完成实机验证。

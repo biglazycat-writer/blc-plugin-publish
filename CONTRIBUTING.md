@@ -2,9 +2,9 @@
 
 ## 开发环境
 
-- Node `22.23.3`（与大懒猫创作平台插件运行时一致），npm 10.x。
+- Node `>=22.23.3 <23.0.0`、npm `>=10.9.9 <11.0.0`，宿主支持 API 1 修订 1。
 - 大懒猫创作平台，用于实际安装、启用和打开插件视图。
-- 本工程不依赖桌面端源码；SDK 由 npm 包 `blc-plugin-sdk@1.0.0` 提供，`package-lock.json` 锁定版本，`npm ci` 需要能访问 npm registry。
+- 本工程不依赖桌面端源码；SDK 由 npm 包 `blc-plugin-sdk@1.1.0` 提供，`package-lock.json` 锁定版本，`npm ci` 需要能访问 npm registry。
 
 ```bash
 npm install
@@ -24,7 +24,7 @@ npm test
 5. **凭据安全**：AppSecret 只经 `ctx.credentials` 存取，不写入配置文件、日志或测试快照；错误信息需脱敏。不要把真实 AppID/AppSecret、代理账号密码或 token 提交进仓库。
 6. **分段协议**：受宿主单次结果 1 MiB 限制，大数据继续走 `transfer.put` / `article.read` 的分片与 hash 一致性校验，不要绕过限制直接返回大结果。
 7. **不做兼容层**：废弃路径直接删除，保持实现简单；不做无关重构。
-8. **文档**：用户可见行为、命令、限制或环境要求有变化时，同步更新 `README.md` 与 `CHANGELOG.md`。
+8. **文档**：用户可见行为、命令、限制或环境要求有变化时，同步更新 `README.md`、`README.en.md` 与 `CHANGELOG.md`。
 
 ## 提交与 PR
 
