@@ -55,23 +55,27 @@ jobs:
       - run: npm run build
       - run: npm test
 
-      # 产物只含构建结果与清单，不含 node_modules；解压后仍需 npm ci。
+      # 桌面端 extractArchive 只剥离 "package/" 前缀，并要求 package.json 位于解压根目录，
+      # 因此归档顶层目录必须命名为 package（与 npm pack 一致），不能用「包名-版本」目录。
+      # 产物不含 node_modules；安装时勾选「准备依赖」由宿主执行 npm ci。
       - name: Package build output
         env:
           VERSION: ${{ steps.meta.outputs.version }}
         run: |
-          STAGE="blc-plugin-publish-$VERSION"
+          STAGE="package"
           rm -rf "$STAGE"
           mkdir -p "$STAGE"
           cp -r dist "$STAGE/dist"
           cp package.json package-lock.json README.md "$STAGE/"
           if [ -f README.en.md ]; then cp README.en.md "$STAGE/"; fi
           if [ -f CHANGELOG.md ]; then cp CHANGELOG.md "$STAGE/"; fi
-          tar -czf "$STAGE.tar.gz" "$STAGE"
-          sha256sum "$STAGE.tar.gz" > "$STAGE.tar.gz.sha256"
+          BUNDLE="blc-plugin-publish-$VERSION.tgz"
+          tar -czf "$BUNDLE" "$STAGE"
+          sha256sum "$BUNDLE" > "$BUNDLE.sha256"
           echo "=== bundle ==="
-          ls -lh "$STAGE.tar.gz" "$STAGE.tar.gz.sha256"
-          tar -tzf "$STAGE.tar.gz" | head -20
+          ls -lh "$BUNDLE" "$BUNDLE.sha256"
+          echo "=== entries (must start with package/) ==="
+          tar -tzf "$BUNDLE" | head -20
 
       - name: Upload validation artifact
         if: steps.meta.outputs.publish == 'false'
@@ -79,8 +83,8 @@ jobs:
         with:
           name: blc-plugin-publish-${{ steps.meta.outputs.version }}
           path: |
-            blc-plugin-publish-*.tar.gz
-            blc-plugin-publish-*.tar.gz.sha256
+            blc-plugin-publish-*.tgz
+            blc-plugin-publish-*.tgz.sha256
 
       - name: Create or update GitHub Release
         if: steps.meta.outputs.publish == 'true'
@@ -106,12 +110,12 @@ jobs:
 
           if gh release view "$TAG" >/dev/null 2>&1; then
             echo "Release $TAG exists; updating assets and notes."
-            gh release upload "$TAG" blc-plugin-publish-*.tar.gz blc-plugin-publish-*.tar.gz.sha256 --clobber
+            gh release upload "$TAG" blc-plugin-publish-*.tgz blc-plugin-publish-*.tgz.sha256 --clobber
             gh release edit "$TAG" --notes-file "$NOTES"
           else
             echo "Creating Release $TAG."
             gh release create "$TAG" \
-              blc-plugin-publish-*.tar.gz blc-plugin-publish-*.tar.gz.sha256 \
+              blc-plugin-publish-*.tgz blc-plugin-publish-*.tgz.sha256 \
               --title "blc-plugin-publish $TAG" \
               --notes-file "$NOTES"
           fi
