@@ -1,0 +1,351 @@
+/*
+@name 国风节日
+@description 宣纸暖底、赭金细线与宋体长文：沿用默认排版的克制节奏，留一点国风的气韵，安静耐读
+@tags 国风,宣纸,宋体,长文,朱砂
+@accent #b22222
+@accentSecondary #c9a96e
+
+设计意图（2026-10-29 与「默认主题」合并后的版本）
+  取默认排版的长处：左对齐、行距收紧到 1.9、段距 0.9em、正文 17px、装饰只做一层。
+  留国风的气韵：宣纸暖底、赭金细线、宋体正文 —— 不再往标题上叠祥云纹，
+  也不给引用块挂印章。装饰越少，长文越耐读。
+
+三个决策
+  字体  宋体（Songti / Noto Serif / SimSun）—— 书籍正文的字面，比楷体更稳、更耐长读
+  节奏  正文行距 1.9、字距 0.02em、段距 0.9em；章节之间靠 2em 留白分开
+  字距  标题不再做「散排」：h1 与正文同为 0.02em，h2–h6 0.04em。0.18em 的宽字距在
+        中英混排的标题上会把词拆成一字一顿，字号越大越明显
+
+字号
+  一律写**绝对 px**。`em` 会落到应用纸张的 `--editor-font-size`（18px）、`rem` 会落到应用根
+  字号（14px），都不是「正文的 1 倍」；更要紧的是算出来是小数 —— `table { font-size: 0.92em }`
+  算成 16.56px，而工具栏字号框读的是 `getComputedStyle`，会把 16.56 原样显示给用户。
+  下面的 px 值是按 17px 正文与全应用标题阶梯（30 / 23 / 21 / 19 / 16 / 15）取整的结果。
+*/
+
+:root {
+  color: #2E2A24;
+  background-color: #FBF7EE;
+  line-height: 1.9;
+  letter-spacing: 0.02em;
+  /* 按词断行，长 URL 才兜底断开；不一致时英文会被从中间折断（Cl / aude Code）。 */
+  word-break: normal;
+  overflow-wrap: break-word;
+  /* 西文用衬线在前、中文用宋体在后：西文字形交给专门的拉丁衬线，中文仍落宋体。
+     否则 Windows 上 SimSun 的拉丁字形会拖累整段英文。 */
+  font-family: "Times New Roman", "Charter", "Noto Serif CJK SC", "Source Han Serif SC", "Songti SC", SimSun, "PingFang SC", "Microsoft YaHei", serif;
+}
+
+h1 {
+  color: #241F1A;
+  text-align: center;
+  font-weight: 700;
+  font-size: 30px;
+  letter-spacing: 0.02em;
+  line-height: 1.5;
+  margin: 1.8em 0 1.2em;
+}
+
+/* 章节标题：一条发丝线。没有云纹，也没有第二层装饰。 */
+h2 {
+  color: #2A241E;
+  font-size: 23px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  line-height: 1.5;
+  margin: 2em 0 0.9em;
+  padding-bottom: 0.45em;
+  border-bottom: 1px solid rgba(178, 34, 34, 0.16);
+}
+
+/* 三级标题：一道赭金竖线，比菱形安静。 */
+h3 {
+  color: #5C4632;
+  font-size: 21px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  line-height: 1.6;
+  margin: 1.7em 0 0.6em;
+  padding-left: 0.65em;
+  border-left: 3px solid rgba(178, 34, 34, 0.5);
+}
+
+/* h4–h6：与所有主题共用同一条标题阶梯（19 / 16 / 15px）。不写颜色，跟着 :root 的
+   墨色走 —— 深色段就不用再为它们各写一遍。 */
+h4 {
+  font-size: 19px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  line-height: 1.6;
+  margin: 1.5em 0 0.55em;
+}
+h5 {
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  line-height: 1.6;
+  margin: 1.4em 0 0.5em;
+}
+h6 {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  line-height: 1.6;
+  margin: 1.3em 0 0.5em;
+}
+
+p {
+  color: #2E2A24;
+  font-size: 17px;
+  line-height: 1.9;
+  letter-spacing: 0.02em;
+  margin: 0 0 0.9em;
+  text-align: left;
+  word-break: normal;
+  overflow-wrap: break-word;
+}
+
+strong { color: #A8433A; font-weight: 700; }
+/* 高亮（`==…==`）：极淡的赭金底，像用旧宣纸压了一下 —— 不再用朱底白字那种重手法。 */
+mark { color: #2E2A24; background: #F1DFC4; border-radius: 2px; }
+em { color: #8A5A3B; font-style: normal; }
+
+a {
+  color: #A8433A;
+  border-bottom: 1px solid rgba(168, 67, 58, 0.35);
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+
+/* 引用：宣纸卡片 + 一道朱红竖线。不挂「注」印章 —— 每个引用块都挂一遍只是噪音。 */
+blockquote {
+  margin: 1.6em 0;
+  padding: 0.9em 1.2em;
+  background: #F7F1E6;
+  border-left: 3px solid rgba(178, 34, 34, 0.45);
+  border-radius: 0 4px 4px 0;
+}
+blockquote p {
+  margin: 0 0 0.4em;
+  color: #5B5145;
+  font-size: 16px;
+  line-height: 1.8;
+}
+blockquote p:last-child { margin-bottom: 0; }
+
+/* 列表：原生圆点 / 数字，只把记号染成朱红。形状交给系统字体，位置才和正文对得齐。 */
+ul, ol {
+  margin: 0.9em 0;
+  padding-left: 1.5em;
+  line-height: 1.9;
+}
+ul { list-style: disc; }
+ol { list-style: decimal; }
+li { margin: 0.3em 0; font-size: 17px; }
+li::marker { color: #B2423A; }
+li p { margin: 0; }
+
+/* 任务列表的勾选框：宣纸底 + 朱红框，选中翻成朱红底 + 宣纸色对勾。
+   只动外观不动位置：编辑器的 label 是 flex 居中，Markdown 预览靠 writing.css 的
+   calc((1lh - 15px) / 2) 顶距对齐行心，margin 各有各的对法，这里不碰。 */
+ul[data-type='taskList'] li input[type='checkbox'],
+.mdTaskList li input[type='checkbox'] {
+  appearance: none;
+  position: relative;
+  width: 15px;
+  height: 15px;
+  border: 1px solid rgba(178, 34, 34, 0.45);
+  border-radius: 2px;
+  background: #FBF7EE;
+}
+ul[data-type='taskList'] li input[type='checkbox']:checked,
+.mdTaskList li input[type='checkbox']:checked {
+  border-color: #b22222;
+  background: #b22222;
+}
+ul[data-type='taskList'] li input[type='checkbox']:checked::after,
+.mdTaskList li input[type='checkbox']:checked::after {
+  content: '';
+  position: absolute;
+  left: 4px;
+  top: 1px;
+  width: 4px;
+  height: 8px;
+  border: solid #FBF7EE;
+  border-width: 0 1.5px 1.5px 0;
+  transform: rotate(45deg);
+}
+
+/* 代码块：暖宣纸色的浅底 + 赭金细框。
+   底色与字色必须带 `!important`：应用在浅色界面下用 `:root:not([data-theme='dark'])`
+   前缀（特异度 0,4,1）把所有主题的代码面钉成冷灰 `#f3f5f7` + 深灰字，主题收进作用域
+   只有 0,2,1，不带 `!important` 这套暖色代码面就整块不出现。 */
+pre,
+pre.idea-code-block {
+  margin: 1.5em 0;
+  padding: 1em 1.2em;
+  background: #F4EFE3 !important;
+  color: #3A322A !important;
+  border: 1px solid #E3D6BD;
+  border-radius: 4px;
+  font-family: "SF Mono", Menlo, Consolas, monospace;
+  font-size: 15px;
+  line-height: 1.7;
+  letter-spacing: 0;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+pre code,
+pre.idea-code-block code { color: inherit; background: none; padding: 0; font-size: inherit; }
+
+p code, li code {
+  padding: 0.1em 0.35em;
+  background: #F1E8D6;
+  color: #9C3B2E;
+  border: 1px solid #E3D6BD;
+  border-radius: 3px;
+  font-size: 15px;
+  letter-spacing: 0;
+}
+
+/* 表格：浅赭金表头 + 朱红下边线，不用整块朱红反白 —— 长表格里太压人。 */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5em 0;
+  font-size: 16px;
+  line-height: 1.75;
+}
+table th {
+  padding: 0.55em 0.8em;
+  background: #F6EDE1;
+  color: #2E2A24;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-align: left;
+  border-bottom: 2px solid rgba(178, 34, 34, 0.35);
+}
+table td {
+  padding: 0.55em 0.8em;
+  border-bottom: 1px solid #E7DCC8;
+  text-align: left;
+  vertical-align: top;
+}
+table tr:last-child td { border-bottom: none; }
+
+img {
+  display: block;
+  margin: 1.3em auto;
+  max-width: 100%;
+  border: 1px solid #E3D6BD;
+  border-radius: 3px;
+  box-shadow: 0 2px 10px rgba(90, 70, 40, 0.08);
+  background: #FFFDF8;
+}
+
+hr {
+  height: 1px;
+  margin: 2.4em auto;
+  border: none;
+  background: rgba(201, 169, 110, 0.45);
+}
+
+/* 块间距：换章靠留白。 */
+.pm-block { margin: 0 0 0.9em; }
+.pm-heading-1 { margin-bottom: 1.2em; }
+.pm-heading-2 { margin-top: 2em; }
+.pm-heading-3 { margin-top: 1.7em; }
+.pm-readable-block { margin-bottom: 0.9em; }
+.pm-blockquote, .pm-code-block, .pm-table-block { margin-top: 1.5em; margin-bottom: 1.5em; }
+
+/* 导出侧的组件块（公众号组件渲染器生成）跟着同一套配色。 */
+.wechat-block-summaryCard { border: 1px solid #E7DCC8; background: #FBF7EE; }
+.wechat-block-actionButton p { background: #b22222; border-radius: 3px; }
+.wechat-block-qrCode { border-color: #C9A96E; background: #FBF7EE; }
+.wechat-block-followCta { border-color: #C9A96E; background: #F7F1E6; }
+
+/* 目录（正文里手写的 `[TOC]`）：书前的一页「目次」—— 宣纸底 + 一道朱红书脊。 */
+.pm-toc { margin: 0 0 1.5em; padding: 0.9em 1.2em; border: 1px solid #E7DCC8; border-left: 3px solid #B2423A; border-radius: 2px; background: #FBF7EE; }
+.pm-toc-title { margin: 0 0 0.5em; font-size: 16px; font-weight: 700; letter-spacing: 0.3em; text-align: center; color: #A8433A; }
+.pm-toc-list { list-style: none; margin: 0; padding-left: 0; }
+.pm-toc-item { font-size: 16px; line-height: 1.9; }
+.pm-toc-item::before { content: '·\00a0'; color: #C9A96E; font-size: 14px; }
+.pm-toc-link { color: #5B5145; border-bottom: 0; }
+
+/* @dark */
+/*
+黑夜模式：宣纸翻成「墨夜」。纸底走深褐而不是纯黑 —— 宋体配纯黑会显脏，带一点褐
+才有古纸夜读的感觉。朱红在暗底上会发闷，提亮成 #E08A78；赭金本来就耐暗，只把
+透明度抬一点。只进编辑器；公众号导出永远用上面的宣纸版。
+*/
+:root {
+  color: #E8DFD2;
+  background-color: #1C1814;
+}
+
+h1 { color: #F2E9DC; }
+
+h2 { color: #F2E9DC; border-bottom-color: rgba(224, 112, 95, 0.26); }
+
+h3 { color: #D9B98A; border-left-color: rgba(200, 110, 90, 0.55); }
+
+p { color: #E8DFD2; }
+
+strong { color: #E08A78; }
+mark { color: #F5ECE0; background: #7A3B32; }
+em { color: #D9A46A; }
+
+a { color: #E08A78; border-bottom-color: rgba(224, 138, 120, 0.4); }
+
+blockquote {
+  background: #241F1A;
+  border-left-color: rgba(224, 138, 120, 0.45);
+}
+blockquote p { color: #C4B4A0; }
+
+li::marker { color: #E08A78; }
+
+ul[data-type='taskList'] li input[type='checkbox'],
+.mdTaskList li input[type='checkbox'] {
+  border-color: rgba(224, 138, 120, 0.5);
+  background: #241F1A;
+}
+ul[data-type='taskList'] li input[type='checkbox']:checked,
+.mdTaskList li input[type='checkbox']:checked { border-color: #B85445; background: #B85445; }
+ul[data-type='taskList'] li input[type='checkbox']:checked::after,
+.mdTaskList li input[type='checkbox']:checked::after { border-color: #1C1814; }
+
+pre,
+pre.idea-code-block {
+  background: #13100D !important;
+  color: #EFE5D4 !important;
+  border-color: #4A3B28;
+}
+
+p code, li code {
+  background: rgba(201, 169, 110, 0.14);
+  color: #E8A08E;
+  border-color: rgba(201, 169, 110, 0.3);
+}
+
+table th { background: #2A231D; color: #F2E9DC; border-bottom-color: rgba(224, 138, 120, 0.35); }
+table td { border-bottom-color: rgba(231, 220, 200, 0.12); }
+
+img {
+  border-color: #3E3428;
+  background: #221B16;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+}
+
+hr { background: rgba(201, 169, 110, 0.4); }
+
+.wechat-block-summaryCard { border-color: #3E3428; background: #241F1A; }
+.wechat-block-actionButton p { background: #B85445; }
+.wechat-block-qrCode { border-color: #6B563A; background: #1C1814; }
+.wechat-block-followCta { border-color: #6B563A; background: #201A15; }
+
+.pm-toc { border-color: #3E3428; border-left-color: #B85445; background: #241F1A; }
+.pm-toc-title { color: #E8A08E; }
+.pm-toc-item::before { color: #C9A96E; }
+.pm-toc-link { color: #E8DFD2; }

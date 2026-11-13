@@ -1,0 +1,209 @@
+/*
+@name 淡紫
+@description 柔紫长文排版：实底紫标题 + 淡紫引用卡 + 紫底行内代码，通透轻盈
+@tags 淡紫,长文阅读,柔和,圆角卡片
+@accent #A06EB4
+@accentSecondary #D4B6E0
+*/
+/*
+观感取自 Typora 的 phycat 主题 mauve 配色
+（https://github.com/sumruler/typora-theme-phycat），把它的紫罗兰色板搬进大懒猫：
+
+  核心紫 #A06EB4 · 深紫 #6A3F7A · 浅紫 #D4B6E0 · 淡紫底 #F3E5F5 · 冷白 #FAFAFC
+  标题兰紫 #ba68c8 · h2 实底 #A06EB4
+  行内代码 #5E35B1 on #F2EFF9
+
+三处「取神不照搬」的取舍（原主题用了导出侧会被丢弃的写法）：
+  1. 原主题靠 `#write::before` + `position: absolute` + `mask-image` 铺交叉斜线底纹。
+     `position: absolute` 会被公众号导出整体丢掉（见 wechat-html-compliance），于是
+     底纹整块放弃，只留一层极淡的紫纸色。
+  2. h1 底部的短条、h3 左侧的紫竖条、引用卡左上的 ✨，在原主题里都是
+     `position: absolute` 的伪元素。这里改用 `background-image` +
+     `background-position` / `background-size` 静态画出来 —— 位置由背景定位决定，
+     不依赖绝对定位，编辑器与导出两边长得一样。
+  3. 原主题的 `:hover` 动效（标题变色、短条伸长、图标放大、卡片浮起）在编辑器里
+     无法预看、在导出里根本不存在，全部舍弃，只保留静止态。
+
+⚠️ **主题里不许出现 `gradient(`**（2026-10-07）：公众号排版规范 4.1.2 要求文字背景尽量
+不用渐变，微信也会把渐变底标成「文字背景渐变」、暗色模式下渐变底不可控。所以短条 / 竖条 /
+代码块标题栏这些**纯色矩形**一律改用内联 SVG data URI 画（本文件本来就靠 data URI 画星星
+和三个圆点）—— 几何形状与原来逐像素一致，但 CSS 里没有一处渐变。守卫测试
+`builtin-themes.test.ts` 的「没有渐变」那条会拦住回潮。
+
+⚠️ data URI 里**不能出现任何引号字符**：公众号导出走 juice 内联，juice 会把带引号的
+url() 重新包成单引号 —— URI 内部若还有单引号，URL 会在第一个单引号处被截断（图形
+静默消失，编辑器里却一切正常）。所以 SVG 属性一律用 `%27` 代替单引号，空格一律用
+`%20`。同理，data URI 必须写成带引号的 url() 形式 —— 无引号形式会被 CSS 解析器
+按结构切开。
+
+⚠️ 字号一律写**绝对整数 px**：`em` 会落到正文块的 `--editor-font-size`、`rem` 会落到
+应用根字号（14px），都不是「正文的 1 倍」；小数 px 会原样显示在工具栏的字号框里。
+⚠️ 行内代码选择器带上 `td code` / `th code`：导出侧单元格内容没有 `<p>` 包裹，
+只写 `p code` 会掉样式。
+*/
+:root { font-family: Optima, "LXGW WenKai", "PingFang SC", "Microsoft YaHei", "Source Han Sans SC", "Noto Sans CJK SC", sans-serif; color: #333333; background: #FDFCFE; line-height: 2.2; letter-spacing: 0.03em; word-break: normal; }
+
+/* 标题：紫罗兰分级标记。h1 居中 + 底部 40×4px 实色短条；h2 实底紫底白字圆角块；
+   h3 左侧紫竖条；h4/h5/h6 依次是实心紫点 / 空心紫环 / 紫色短横线。
+   短条与竖条是**纯色矩形**，用内联 SVG 画（不能用 linear-gradient(#x,#x) 那种
+   「同色渐变当纯色使」的写法 —— 主题里不许出现 gradient，见文件头）。 */
+h1 { color: #2A2330; font-size: 30px; font-weight: 700; line-height: 1.45; letter-spacing: 0.04em; text-align: center; padding-bottom: 12px; background-image: url("data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20viewBox=%270%200%2040%204%27%3E%3Crect%20width=%2740%27%20height=%274%27%20fill=%27%23A06EB4%27/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: center bottom; background-size: 40px 4px; }
+h2 { color: #FFFFFF; font-size: 24px; font-weight: 700; line-height: 1.5; letter-spacing: 0.03em; text-align: left; width: fit-content; padding: 5px 12px; border-radius: 8px; background: #A06EB4; box-shadow: 0 2px 5px rgba(160, 110, 180, 0.22); }
+h3 { color: #2A2330; font-size: 21px; font-weight: 700; line-height: 1.5; letter-spacing: 0.03em; text-align: left; padding-left: 14px; background-image: url("data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20viewBox=%270%200%205%20100%27%20preserveAspectRatio=%27none%27%3E%3Crect%20width=%275%27%20height=%27100%27%20fill=%27%23ba68c8%27/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: left center; background-size: 5px 60%; }
+h4 { color: #2A2330; font-size: 19px; font-weight: 700; line-height: 1.5; letter-spacing: 0.02em; text-align: left; }
+h4::before { content: ""; display: inline-block; width: 10px; height: 10px; margin-right: 8px; border-radius: 100%; background-color: #ba68c8; vertical-align: middle; }
+h5 { color: #4A3F52; font-size: 16px; font-weight: 700; line-height: 1.5; text-align: left; }
+h5::before { content: ""; display: inline-block; width: 10px; height: 10px; margin-right: 8px; border-radius: 100%; border: 2px solid #ba68c8; box-sizing: border-box; vertical-align: middle; }
+h6 { color: #6E6278; font-size: 15px; font-weight: 700; line-height: 1.6; text-align: left; }
+h6::before { content: "-"; display: inline-block; margin-right: 8px; color: #ba68c8; }
+
+/* 正文：行高 2.2 + 字距 0.03em —— phycat 的通透感主要来自行高；字距再大会把英文
+   逐字母拉开（letter-spacing 对拉丁同样生效），中英混排反而变散。 */
+p { color: #333333; font-size: 17px; line-height: 2.2; letter-spacing: 0.03em; text-align: left; word-break: normal; overflow-wrap: break-word; }
+/* 加粗 = 紫罗兰；斜体 = 淡紫虚线底线。`font-style` 走 normal：中文没有真斜体，
+   italic 会让浏览器把字形强行倾斜（笔画发糊），这套主题靠颜色 + 虚线下划线区分，
+   保持直立。
+   （原来那条虚线下划线是一条 `linear-gradient` 画的斜点划纹，换成 `border-bottom`
+   —— 形状略简化，但主题里不许留渐变。） */
+strong { color: #A06EB4; font-weight: 700; letter-spacing: 0.03em; }
+em { color: #5B4A66; font-style: normal; padding-bottom: 2px; border-bottom: 2px dashed #D4B6E0; }
+del { color: #9A90A4; text-decoration: line-through; }
+
+a { color: #A06EB4; border-bottom: 1px solid #D4B6E0; text-decoration: none; }
+/* 高亮（`==…==`）：淡紫整块底。原来只盖底部 40%（用 `linear-gradient` 做「荧光笔」），
+   现在按规范改成实色底 —— 渐变的文字背景在公众号里会被标记。 */
+mark { color: inherit; background: #F3E5F5; border-radius: 4px; padding: 0 2px; }
+
+/* 引用：无描边淡紫圆角卡 + 左上角紫色小星（原主题的 ✨ 改成静态 SVG 背景，不用绝对定位）。
+   文字缩进 46px 给星星让位。 */
+blockquote { color: #5B4A66; background-color: #F7F4FA; background-image: url("data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20viewBox=%270%200%2024%2024%27%3E%3Cpath%20fill=%27%23C79BD8%27%20d=%27M12%201.8c.7%204.9%203.3%207.5%208.2%208.2-4.9.7-7.5%203.3-8.2%208.2-.7-4.9-3.3-7.5-8.2-8.2%204.9-.7%207.5-3.3%208.2-8.2z%27/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: 16px 18px; background-size: 18px 18px; border: 0; border-radius: 14px; padding: 16px 20px 16px 46px; }
+blockquote p { color: #5B4A66; font-size: 16px; line-height: 1.9; }
+
+ul, ol { color: #333333; font-size: 17px; padding-left: 1.7em; }
+li { color: #333333; font-size: 17px; letter-spacing: 0.03em; }
+li::marker { color: #A06EB4; }
+
+/* 行内代码：紫底深紫字 + 6px 圆角（原主题 `code:not(.md-fencescode)`）。
+   带上 `td code` / `th code`：导出侧单元格内容没有 `<p>` 包裹，只写 `p code` 会掉样式。 */
+p code, li code, td code, th code { color: #5E35B1; background: #F2EFF9; border: 0; border-radius: 6px; padding: 2px 5px; font-family: ui-monospace, "Cascadia Code", "JetBrains Mono", Consolas, "Microsoft YaHei", monospace; font-size: 15px; letter-spacing: 0; }
+
+/* 代码块：mac 风标题栏（左侧三个圆点 + 右上角语言名）+ 淡紫纸面。
+   标题栏的底色、分隔线、三个圆点全部画在 `pre` **自己的多层背景**上，语言名交给
+   `pre::before` 这个**块级伪元素**用 `content: attr(data-language)` 输出 ——
+   两处都不依赖绝对定位，公众号导出靠 juice 的 `inlinePseudoElements` 把伪元素转成
+   真实节点，编辑器与导出长得一样。
+   语言名依赖 `<pre data-language>`：三个渲染端各自补（编辑器 node view、公众号导出、
+   Markdown 预览），缺了就是空标题栏、只剩圆点。
+   为什么标题栏不用 `margin: 0 -16px` 出血：`pre` 是 `overflow-x: auto` 的滚动容器，
+   负外边距会让伪元素向右多出 16px 的可滚动溢出 —— 短代码也会凭空长出一条横向滚动条。
+   多层背景的 `!important` 一个都不能少：writing.css 在浅色界面下用
+   `:root:not([data-theme='dark'])` 前缀（特异度 0,4,1）写 `background: #f3f5f7` 简写，
+   会把 background-image / repeat / position / size 一起重置回初始值。
+   圆点的纵向位置 = (条带 28px − 图 12px) / 2 = **8px**，不是 14px —— 写 14px 会整体偏低 6px。 */
+pre { background-color: #F8F6FB !important; background-image: url("data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20viewBox=%270%200%2042%2012%27%3E%3Ccircle%20cx=%276%27%20cy=%276%27%20r=%274.5%27%20fill=%27%23FF5F56%27/%3E%3Ccircle%20cx=%2721%27%20cy=%276%27%20r=%274.5%27%20fill=%27%23FFBD2E%27/%3E%3Ccircle%20cx=%2736%27%20cy=%276%27%20r=%274.5%27%20fill=%27%2327C93F%27/%3E%3C/svg%3E"), url("data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20viewBox=%270%200%201%2028%27%20preserveAspectRatio=%27none%27%3E%3Crect%20width=%271%27%20height=%2727%27%20fill=%27%23F1ECF7%27/%3E%3Crect%20y=%2727%27%20width=%271%27%20height=%271%27%20fill=%27%23E4D9EE%27/%3E%3C/svg%3E") !important; background-repeat: no-repeat !important; background-position: 14px 8px, 0 0 !important; background-size: 42px 12px, 100% 28px !important; color: #3A2E45 !important; border: 1px solid #E4D9EE !important; box-shadow: none !important; border-radius: 8px; padding: 0 16px 14px; font-family: ui-monospace, "Cascadia Code", "JetBrains Mono", Consolas, "Microsoft YaHei", monospace; font-size: 14px; line-height: 1.7; letter-spacing: 0; overflow-x: auto; }
+/* `position` / `text-transform` / `opacity` 三条必须显式复位：应用的 Markdown 源码模式预览
+   （`.mdPreviewContent`）自带一个**绝对定位**的 `pre[data-language]::before` 小角标，
+   特异度与本规则相同、主题后注入只赢在它声明过的属性上 —— 不复位就会变成「空出一条
+   标题栏 + 右上角浮着半透明大写角标」。 */
+pre::before { content: attr(data-language); position: static; display: block; height: 28px; margin: 0 0 12px; opacity: 1; color: #9A8CA8; font-family: ui-monospace, "Cascadia Code", "JetBrains Mono", Consolas, "Microsoft YaHei", monospace; font-size: 12px; line-height: 28px; letter-spacing: 0; text-transform: none; text-align: right; }
+pre code { color: inherit; background: none; border: 0; border-radius: 0; padding: 0; font-size: 100%; font-family: inherit; white-space: pre; }
+
+/* 表格：淡紫描边 + 圆角外框 + 淡紫表头深紫字。
+   圆角必须走 `border-collapse: separate` —— `collapse` 下浏览器会忽略 table 的
+   `border-radius`（格子自己画边框，画不出圆角）。所以：外框与圆角交给 table
+   自己，内部只用「右边 + 下边」的分隔线，最右一列 / 最后一行的分隔线用
+   `:last-child` 去掉，避免和外框叠成 2px。
+   `:last-child` 是 juice 支持的（已实测内联正确），`:nth-child` 不支持。
+   单元格先写 `border: 0`：writing.css 给 `td/th` 垫了一层四边 1px 描边（0,1,1），
+   不清掉的话圆角框里会多出上/左两条线。
+   单元格里的段落不必额外复位对齐：正文本来就是左对齐（phycat 也不是两端对齐）。 */
+table { background: #FFFFFF; border-collapse: separate; border-spacing: 0; font-size: 14px; line-height: 1.7; border: 1px solid #D4B6E0; border-radius: 8px; overflow: hidden; }
+table th, table td { color: #333333; border: 0; border-right: 1px solid #EFE9F5; border-bottom: 1px solid #EFE9F5; padding: 8px 12px; text-align: left; }
+table th { color: #6A3F7A; background: #F3E5F5; font-weight: 700; }
+table th:last-child, table td:last-child { border-right: 0; }
+table tr:last-child td { border-bottom: 0; }
+
+hr { border: 0; border-top: 3px dashed #D4B6E0; opacity: 0.7; }
+img { border: 0; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); background: #FFFFFF; }
+
+/* 块间距：标题上方留白大、下方贴近正文；文档首块不要顶部留白。
+   底座的 `.pm-block { margin: 0.58em 0 }` 特异度更高（0,3,0），所以间距必须写在这些
+   pm-* 类上，光写 `p` 压不过。 */
+.pm-block { margin: 0 0 0.6em; }
+.pm-heading-1 { margin-top: 1.5em; margin-bottom: 0.85em; }
+.pm-heading-2 { margin-top: 1.4em; margin-bottom: 0.7em; }
+.pm-heading-3 { margin-top: 1.2em; margin-bottom: 0.55em; }
+.pm-heading-4, .pm-heading-5, .pm-heading-6 { margin-top: 1em; margin-bottom: 0.45em; }
+.pm-first-block { margin-top: 0; }
+
+/* 目录（正文里手写的 `[TOC]`）：目录标题就是一枚小号 h2 实底紫芯片，条目排在淡紫卡里。 */
+.pm-toc { margin: 0 0 1.8em; padding: 16px 18px; border: 1px solid #EFE9F5; background: #FAF7FC; border-radius: 12px; }
+.pm-toc-title {
+  margin: 0 0 0.7em;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: #FFFFFF;
+  width: fit-content;
+  padding: 3px 10px;
+  border-radius: 8px;
+  background: #A06EB4;
+}
+.pm-toc-list { list-style: decimal; margin: 0; padding-left: 1.8em; }
+.pm-toc-item { font-size: 17px; line-height: 2; }
+.pm-toc-link { color: #333333; border-bottom: 0; }
+
+/* @dark */
+/*
+黑夜模式：把紫罗兰整体压暗一档 —— 纸色换成深紫墨，紫底收深，行内代码与引用卡换成
+暗紫，紫字提亮到能在暗底上读清。标题底、表格线也一起换紫墨系，避免深色下冷灰发脏。
+只进编辑器；公众号导出永远用上面的浅紫纸版。
+浅色段用了 `!important` 的地方（代码面）这里必须同样带 —— 两者都重要时按加载顺序决胜。
+*/
+:root { color: #DED6E6; background-color: #17131C; }
+
+h1 { color: #F1EBF6; }
+h2 { color: #FFFFFF; background: #5C3C6E; }
+h3 { color: #F1EBF6; }
+h4 { color: #F1EBF6; }
+h5 { color: #CBBFD6; }
+h6 { color: #A99DB5; }
+h6::before { color: #C79BD8; }
+
+p { color: #DED6E6; }
+strong { color: #C79BD8; }
+em { color: #C4B7CE; border-bottom-color: #4A3560; }
+del { color: #857A90; }
+
+a { color: #C79BD8; border-bottom-color: #5B4372; }
+mark { background: #3E2C50; }
+
+/* 引用卡：深色底座用 `background` 简写把浅色段设的紫星背景一并重置了
+   （`DARK_BASE_THEME_CSS` 的 `blockquote { background: #202020 }`），
+   所以这里必须把 background-image / repeat / position / size 四条重新写一遍。 */
+blockquote { color: #C4B7CE; background-color: #211A2A; background-image: url("data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20viewBox=%270%200%2024%2024%27%3E%3Cpath%20fill=%27%23C79BD8%27%20d=%27M12%201.8c.7%204.9%203.3%207.5%208.2%208.2-4.9.7-7.5%203.3-8.2%208.2-.7-4.9-3.3-7.5-8.2-8.2%204.9-.7%207.5-3.3%208.2-8.2z%27/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: 16px 18px; background-size: 18px 18px; }
+blockquote p { color: #C4B7CE; }
+
+ul, ol { color: #DED6E6; }
+li { color: #DED6E6; }
+li::marker { color: #C79BD8; }
+
+p code, li code, td code, th code { color: #D6BBF0; background: #2A2136; }
+
+/* 代码块：标题栏换成暗紫。三个圆点是 mac 的固定色，暗底上照样好看，不必改；
+   但 `background-image` 是一整串图层、位置敏感，没法只换其中一层 —— 必须整串重写，
+   否则浅色段的 `!important` 会把浅紫标题栏留在深色纸上。 */
+pre { background-color: #1B1523 !important; background-image: url("data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20viewBox=%270%200%2042%2012%27%3E%3Ccircle%20cx=%276%27%20cy=%276%27%20r=%274.5%27%20fill=%27%23FF5F56%27/%3E%3Ccircle%20cx=%2721%27%20cy=%276%27%20r=%274.5%27%20fill=%27%23FFBD2E%27/%3E%3Ccircle%20cx=%2736%27%20cy=%276%27%20r=%274.5%27%20fill=%27%2327C93F%27/%3E%3C/svg%3E"), url("data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20viewBox=%270%200%201%2028%27%20preserveAspectRatio=%27none%27%3E%3Crect%20width=%271%27%20height=%2727%27%20fill=%27%23221A2E%27/%3E%3Crect%20y=%2727%27%20width=%271%27%20height=%271%27%20fill=%27%23362A45%27/%3E%3C/svg%3E") !important; background-repeat: no-repeat !important; background-position: 14px 8px, 0 0 !important; background-size: 42px 12px, 100% 28px !important; color: #DED6E6 !important; border: 1px solid #362A45 !important; box-shadow: none !important; }
+pre::before { color: #A08FB0; }
+
+table { background: #1B1523; border-color: #4A3560; }
+table th, table td { color: #DED6E6; border-color: #3A2C4A; }
+table th { color: #E4D0F0; background: #2A2136; }
+
+hr { border-top-color: #4A3560; }
+img { background: #1B1523; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5); }
+
+.pm-toc { border-color: #3A2C4A; background: #1F1828; }
+/* 标题是紫底芯片上的白字，深色段只把芯片的底色收深，字色仍是白。 */
+.pm-toc-title { color: #FFFFFF; background: #5C3C6E; }
+.pm-toc-link { color: #DED6E6; }

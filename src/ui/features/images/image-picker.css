@@ -1,0 +1,45 @@
+.lbModal.gallery.coverPickerDialog { width: min(960px, 100%); max-height: min(88vh, 840px); background: var(--bg-surface); }
+.coverPickerDialog .lbModalHeader h2 { margin: 0; }
+.coverPickerDialog .lbModalHeader p { margin: 6px 0 0; font-size: 12px; color: var(--text-secondary); }
+.coverPickerBody { min-height: 0; }
+.coverPickerToolbar { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; }
+.coverPickerSearch { display: flex; align-items: center; gap: 8px; flex: 1 1 240px; min-width: 0; padding: 0 10px; border: 1px solid var(--border-default); border-radius: 6px; color: var(--text-secondary); }
+.coverPickerSearch input { width: 100%; min-width: 0; border: 0; background: transparent; outline: 0; font-size: 13px; }
+.coverPickerSearch:focus-within { border-color: var(--color-primary); }
+.coverPickerContent { display: grid; grid-template-columns: minmax(0, 1fr) 240px; gap: 20px; }
+.coverPickerLibrary { min-width: 0; }
+.coverPickerLibrary > header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.coverPickerContent h3 { margin: 0; font-size: 13px; }
+.coverPickerLibrary small, .coverPickerPreview > span, .coverPickerPreview > small { color: var(--text-secondary); font-size: 12px; }
+.coverPickerGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
+.coverPickerCard { display: flex; flex-direction: column; align-self: start; gap: 6px; min-width: 0; padding: 0 0 10px; text-align: left; overflow: hidden; border: 1px solid var(--border-default); border-radius: 8px; background: var(--bg-surface); }
+.coverPickerCard:disabled { opacity: 1; }
+.coverPickerCard:not(:disabled):hover, .coverPickerCard.selected { border-color: var(--color-primary); background: var(--color-primary-bg); }
+.coverPickerCard.selected { box-shadow: 0 0 0 1px var(--color-primary); }
+.coverPickerThumb { position: relative; display: flex; flex: none; align-items: center; justify-content: center; width: 100%; aspect-ratio: 4 / 3; overflow: hidden; background: var(--bg-sunken); color: var(--text-secondary); }
+.coverPickerThumb > span { display: flex; align-items: center; flex-direction: column; gap: 6px; font-size: 12px; }
+.coverPickerThumb img, .coverPickerSelectedImage img { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: contain; }
+.coverPickerThumb > i { position: absolute; top: 8px; right: 8px; display: flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; color: #fff; background: var(--color-primary); }
+.coverPickerName { display: block; max-width: 100%; padding: 0 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; }
+.coverPickerCard > small { padding: 0 10px; }
+.coverPickerPreview { display: flex; flex-direction: column; align-self: start; gap: 10px; min-width: 0; padding: 14px; border: 1px solid var(--border-default); border-radius: 8px; background: var(--fill-subtle); }
+.coverPickerSelectedImage { position: relative; width: 100%; aspect-ratio: 4 / 3; overflow: hidden; border-radius: 6px; background: var(--bg-sunken); }
+.coverPickerPreview > strong { font-size: 13px; overflow-wrap: anywhere; }
+.coverPickerPreview p { margin: 4px 0 0; font-size: 12px; color: var(--text-secondary); }
+.coverPickerEmpty { display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 10px; min-height: 180px; color: var(--text-secondary); font-size: 12px; text-align: center; }
+.coverPickerEmpty strong { font-size: 13px; font-weight: 500; }
+.coverPickerLoading { display: flex; align-items: center; justify-content: center; gap: 8px; color: var(--text-secondary); font-size: 12px; }
+.coverPickerError { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin: 0; color: var(--text-danger); font-size: 12px; line-height: 1.5; overflow-wrap: anywhere; }
+.coverPickerMore { margin-top: 14px; }
+.coverPickerDialog .coverPickerFooter { align-items: center; justify-content: space-between; flex-wrap: wrap; }
+.coverPickerFooter > span { font-size: 12px; color: var(--text-secondary); }
+.coverPickerFooter > div { display: flex; gap: 8px; margin-left: auto; }
+.coverPickerCard:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
+@media (max-width: 640px) {
+  .lbModalOverlay.coverPickerBackdrop { padding: 12px; }
+  .lbModal.gallery.coverPickerDialog { max-height: calc(100vh - 24px); }
+  .coverPickerContent { grid-template-columns: minmax(0, 1fr); }
+  .coverPickerGrid { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); }
+  .coverPickerPreview { gap: 8px; }
+  .coverPickerSelectedImage { max-height: 180px; }
+}

@@ -1,0 +1,219 @@
+/*
+@name 蓝色科技
+@description 克制的科技蓝 + 舒适长文排版，居中宋体题头与蓝底章节牌，深色代码窗，适合技术解读、编程、数码内容
+@tags 科技蓝,长文阅读,深色代码
+@accent #1677ff
+@accentSecondary #202936
+
+设计意图（2026-10-29 参照 Typora 主题 Lapis 重做题头：白纸 + 宋体标题 + 一支蓝）
+  一级标题居中、宋体、主题蓝，不再套深蓝面板，也不再挂钩短横线 —— 题头靠位置、字号和
+  留白立住，一页只有一处居中，翻页时视线有落点。二级标题是 Lapis 的蓝底白字小牌：
+  蓝底只包住标题文字本身，不做通栏色带。其余层级仍用**字号与留白**建立，蓝色只作强调；
+  整页唯一的深色块是代码终端窗（不做整页暗底：公众号读者白天看、还会打印）。
+  主题色只用自己声明的 hex（#1677ff 系），行内代码不再跟应用界面主题色走 ——
+  否则蓝色文档里会串出别的色。
+
+字号一律写**绝对 px**：`em` 会落到应用纸张的 `--editor-font-size`（18px）、`rem` 落到应用根
+字号（14px），都不是「正文的 1 倍」，还会算出小数（工具栏字号框读 `getComputedStyle`，
+会把 15.84 这种值原样显示）。
+
+文件末尾 `@dark` 之后是黑夜档：白纸翻成深色纸，正文与界面同步换色。
+*/
+
+:root { color: #343A43; }
+
+/* 题头：一级标题居中宋体（Lapis 的做法），二级标题是蓝底白字的小牌。
+   两者都靠字号、留白和位置建立层级，蓝色只作为强调，不让每级标题都抢眼。 */
+h1 {
+  color: #145DBF;
+  text-align: center;
+  font-size: 28px;
+  font-family: "Source Han Serif SC", "Noto Serif CJK SC", "Songti SC", SimSun, serif;
+  letter-spacing: 0.04em;
+  line-height: 1.5;
+  margin: 1.6em 0 1.15em;
+}
+/* 蓝底只包住标题文字本身（inline-block），不是通栏色带；竖直间距交给 .pm-heading-2，
+   免得导出时外层 section 与内层 h2 的 margin 叠成双份。 */
+h2 {
+  display: inline-block;
+  background: #145DBF;
+  color: #FFFFFF;
+  font-family: "Source Han Serif SC", "Noto Serif CJK SC", "Songti SC", SimSun, serif;
+  letter-spacing: 0.04em;
+  line-height: 1.5;
+  padding: 0.1em 0.55em;
+  border-radius: 4px;
+  margin: 0;
+}
+h2 a, h2 strong, h2 em { color: #FFFFFF; }
+h2 a { border-bottom-color: rgba(255, 255, 255, 0.55); }
+h3 { color: #273648; line-height: 1.55; margin: 1.45em 0 0.55em; }
+/* 标题四：左侧蓝 tick，和题头的蓝同语言；h5/h6 保持素面。 */
+h4 { color: #35465A; border-left: 2px solid #1677FF; padding-left: 0.65em; margin: 1.25em 0 0.5em; }
+
+/* 正文：放松段落节奏，避免整页形成密集灰色文字墙。这三条同时是编辑器设置面板
+   三个滑块的默认值（readThemeRhythm），改动会被守卫测试看见。 */
+p { margin-top: 0; margin-bottom: 0.95em; line-height: 1.9; }
+li { line-height: 1.85; margin-bottom: 0.28em; }
+
+/* 强调：蓝色稍深，避免亮蓝大面积出现。字重显式写 700：主题自己的字体族
+   （-apple-system / 微软雅黑）在中文上没有 600 档，写 600 会被静默取整成别的样子。 */
+strong { color: #145DBF; font-weight: 700; }
+a { color: #145DBF; border-bottom-color: #9BBCEB; }
+/* 高亮（`==…==`）：浅蓝底 + 深蓝字，跟章节/链接同一支蓝。 */
+mark { color: #124C96; background: #E4EFFF; border-radius: 3px; padding: 0 0.12em; }
+
+/* 行内代码：浅蓝灰底的小标签，不再像密集的黑色芯片。
+   字号写绝对 px（0.92em 会算出 14.72，工具栏字号框原样显示小数点）。 */
+:not(pre) > code {
+  background: #EDF3FA;
+  color: #294D78;
+  border: 1px solid #DCE7F4;
+  padding: 0.08em 0.32em;
+  border-radius: 4px;
+  box-shadow: none;
+  font-family: "JetBrains Mono", "Cascadia Code", "Fira Code", Consolas, monospace;
+  font-size: 14px;
+}
+
+/* 引用：降低底色对比，保持蓝色识别；嵌套引用加深一档，层级可读。 */
+blockquote { border-left: 3px solid #4A8FE8; background: #F4F8FE; border-radius: 0 4px 4px 0; padding: 0.75em 1em; margin: 1.25em 0; }
+blockquote blockquote { background: #EAF2FC; }
+blockquote p { color: #4D5968; }
+
+/* 代码块：保留深色终端感（这套主题的身份），但撤掉三色圆点与厚重阴影。
+   writing.css 在浅色界面下用 :root:not([data-theme='dark']) 前缀（特异度 0,4,1）
+   把代码面钉成浅底浅字、还连带一套浅色 hljs 配色 —— 那是无主题时的兜底，
+   会盖掉这里的深色终端窗。用 !important 夺回；颜色随 juice 内联进导出 HTML，
+   微信侧不受影响。 */
+pre, pre.idea-code-block {
+  background: #202936 !important;
+  border: 1px solid #2E3A4B !important;
+  border-radius: 7px;
+  color: #D5DDE8 !important;
+  box-shadow: none !important;
+  padding: 1em 1.15em;
+  position: relative;
+  line-height: 1.7;
+}
+/* 撤掉 Mac 三色圆点（原来是实心圆 + box-shadow 复制）。 */
+pre::before, pre[data-language]::before, pre.idea-code-block::before, pre.idea-code-block[data-language]::before { content: none; display: none; }
+/* 语言标签：右上角小字。预览侧 writing.css 也用 pre[data-language]::before 显示语言标签，
+   这里把同款选择器列进来靠加载顺序压掉它，标签改走 ::after。 */
+pre[data-language]::after, pre.idea-code-block[data-language]::after {
+  content: attr(data-language);
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  font-family: "JetBrains Mono", Consolas, monospace;
+  color: #8FA4BF;
+}
+pre code { color: #D5DDE8 !important; }
+
+/* 分隔线：一条轻量蓝灰实线（原来是两端渐隐的渐变线，按公众号排版规范 4.1.2 改实色）。 */
+hr { height: 1px; border: none; background: #CBD9EA; border-radius: 0; margin: 1.8em 0; }
+/* 图片：细蓝边 + 一圈蓝色柔光，和分隔线同一支科技蓝。 */
+img { border: 1px solid #E0E8F2; border-radius: 5px; box-shadow: 0 3px 10px rgba(27, 72, 125, 0.07); background: #FFFFFF; }
+
+/* 列表：符号上主题蓝。Chromium 的 outside marker 与文字之间默认没有间隙，
+   序号会粘成「1第一」，用 content 显式把间隔补回来。 */
+li::marker { color: #397DD6; }
+ul > li::marker { content: '•\00a0\00a0'; }
+ol > li::marker { content: counter(list-item) '.\00a0'; }
+ul[data-type='taskList'] li input[type='checkbox'],
+.mdTaskList li input[type='checkbox'] { accent-color: #1677FF; }
+
+/* 表格：浅蓝表头 + 蓝灰细线 + 斑马纹。一屏里的深色块只剩代码窗，深浅节奏才立得住。 */
+table { border-collapse: collapse; width: 100%; }
+table th { background: #EAF1FB; color: #1C2D43; }
+table td { border-bottom: 1px solid #DCE4EF; }
+table tr:nth-child(even) td { background: #F7F9FC; }
+
+/* 语法高亮：Darcula 系配色。!important 压过 writing.css 浅色模式的 hljs 覆盖
+   （特异度 0,5,1），否则浅色调色板会画在深色终端底上。 */
+.hljs-keyword { color: #c678dd !important; }
+.hljs-string { color: #98c379 !important; }
+.hljs-number { color: #d19a66 !important; }
+.hljs-comment { color: #5c6370 !important; font-style: italic; }
+.hljs-function { color: #61afef !important; }
+.hljs-title { color: #61afef !important; }
+.hljs-attr { color: #d19a66 !important; }
+.hljs-tag { color: #e06c75 !important; }
+.hljs-name { color: #e06c75 !important; }
+.hljs-built_in { color: #e6c07b !important; }
+.hljs-params { color: #abb2bf !important; }
+
+/* 顶层块（编辑器挂在块元素上，导出挂在包住它的 section 上 —— 同一套规则两种载体）。
+   二级标题的蓝底画在 h2 上，这里只给外层留出竖直间距。 */
+.pm-heading-2 { margin: 1.7em 0 0.7em; }
+.pm-code-block { background: #202936; border-radius: 7px; padding: 0.1em; box-shadow: none; margin: 0; }
+.pm-table-block { border: 1px solid #DCE5F1; border-radius: 6px; padding: 0.1em; background: #FFFFFF; }
+
+/* 目录（正文里手写的 `[TOC]`）：终端清单的样子 —— 等宽小标题 + 一条蓝色左线，
+   不套卡片（这套主题的卡片已经够多，目录再套一层就糊）。 */
+.pm-toc { margin: 0 0 1.8em; padding: 0 0 0 13px; border: 0; border-left: 2px solid #397DD6; background: transparent; border-radius: 0; }
+.pm-toc-title { margin: 0 0 0.6em; font-size: 12px; font-weight: 700; letter-spacing: 1.5px; color: #2869B5; font-family: "SFMono-Regular", Menlo, Consolas, "Courier New", monospace; }
+.pm-toc-list { list-style: decimal; margin: 0; padding-left: 1.8em; }
+.pm-toc-item { font-size: 16px; line-height: 1.85; }
+.pm-toc-link { color: #26394F; border-bottom: 0; }
+
+/* @dark */
+/*
+黑夜模式：白纸翻成深色纸，主题蓝提亮到 #8ABEFF / #69A8F5 才在暗底上站得住。
+二级标题的蓝底在暗纸上换一档稍深的蓝（#1F4E80），白字对比才够。
+浅色段里那些 `!important`（代码窗、hljs）在这里必须同样带 `!important` 才压得回去 ——
+两者都重要时按加载顺序决胜，深色段在后面。
+只进编辑器；公众号导出永远用上面的白纸版。
+*/
+:root { color: #C8D2E0; background-color: #151B24; }
+
+h1 { color: #8ABEFF; }
+
+h2 { background: #1F4E80; color: #FFFFFF; }
+h2 a, h2 strong, h2 em { color: #FFFFFF; }
+h2 a { border-bottom-color: rgba(255, 255, 255, 0.4); }
+
+h3 { color: #D0D9E5; }
+
+h4 { color: #C6D4E6; border-left-color: #69A8F5; }
+
+strong { color: #8ABEFF; }
+a { color: #8ABEFF; border-bottom-color: #42658F; }
+mark { color: #C6DFFF; background: #233D5D; }
+
+:not(pre) > code { background: #202C3B; color: #C7DDF8; border: 1px solid #30445D; box-shadow: none; }
+
+blockquote { border-left-color: #5A9CF0; background: #1B2634; }
+blockquote blockquote { background: #17212D; }
+blockquote p { color: #AAB8C9; }
+
+pre, pre.idea-code-block {
+  background: #111720 !important;
+  border: 1px solid #293546 !important;
+  color: #D5DDE8 !important;
+  box-shadow: none !important;
+}
+pre[data-language]::after, pre.idea-code-block[data-language]::after { color: #7F9AB9; }
+pre code { color: #D5DDE8 !important; }
+
+hr { background: #344B65; }
+img { border-color: #2A3B50; background: #111720; box-shadow: none; }
+
+li::marker { color: #69A8F5; }
+ul[data-type='taskList'] li input[type='checkbox'],
+.mdTaskList li input[type='checkbox'] { accent-color: #69A8F5; }
+
+table th { background: #202D3D; color: #DDEBFC; }
+table td { border-bottom: 1px solid #2B394A; }
+table tr:nth-child(even) td { background: #19222E; }
+
+.pm-code-block { background: #111720; box-shadow: none; }
+.pm-table-block { border: 1px solid #2B394A; background: #171F2A; }
+
+.pm-toc { border-left-color: #69A8F5; }
+.pm-toc-title { color: #8ABEFF; }
+.pm-toc-link { color: #DDE6F2; }

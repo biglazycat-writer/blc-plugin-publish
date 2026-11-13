@@ -1,0 +1,125 @@
+/*
+@name 报刊
+@description 报纸刊头（居中大标题 + 单下划线）；章节报眉双线
+@tags 黑白,报刊风,强标题
+@accent #111111
+@accentSecondary #d9d9d9
+*/
+:root { color: #111111; line-height: 1.82; letter-spacing: 0.2px; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif; }
+/* 刊头只保留标题下方的一条细线；使用 border，编辑器与公众号导出保持一致。 */
+h1 { color: #111111; text-align: center; margin-top: 1.2em; margin-bottom: 1.1em; padding: 0.6em 0.4em 0.5em; font-size: 28px; font-weight: 700; line-height: 1.25; letter-spacing: 2px; border: none; border-bottom: 1px solid #111111; }
+/* 章节：报眉双线 —— 粗线在上、细线在下，标题居中，报纸栏目带的经典版式。
+   不写编号 —— 报刊的章节号交给作者自己写进标题，主题不替他数。 */
+h2 { color: #111111; text-align: center; margin-top: 1.2em; margin-bottom: 0.65em; padding: 0.3em 0; background: transparent; border-top: 3px solid #111111; border-bottom: 1px solid #111111; font-size: 22px; font-weight: 700; line-height: 1.35; letter-spacing: 1px; }
+h3 { color: #111111; padding-bottom: 0.25em; border-bottom: 1px solid #111111; font-size: 20px; font-weight: 700; letter-spacing: 0.5px; }
+/* h4–h6：与所有主题共用同一条标题阶梯（18 / 15 / 14px），只补上这套主题的排版气质
+   —— 不写颜色，跟着 :root 的墨色走，深色段才不用再覆盖一遍。 */
+h4 { margin-top: 1.1em; margin-bottom: 0.5em; font-size: 18px; font-weight: 700; letter-spacing: 0.5px; }
+h5 { margin-top: 1em; margin-bottom: 0.45em; font-size: 15px; font-weight: 700; letter-spacing: 0.5px; }
+h6 { margin-top: 0.95em; margin-bottom: 0.4em; font-size: 14px; font-weight: 700; letter-spacing: 0.5px; }
+p { color: #222222; line-height: 1.88; margin-bottom: 0.68em; text-align: justify; text-justify: inter-ideograph; }
+blockquote { margin: 1em 0; padding: 0.85em 1em; border-top: 2px solid #111111; border-bottom: 2px solid #111111; border-left: none; background: #f7f7f7; border-radius: 0; }
+blockquote p { color: #111111; font-size: 15px; line-height: 1.8; font-weight: 700; }
+ul, ol { padding-left: 1.4em; }
+li { color: #222222; }
+a { color: #111111; border-bottom: 2px solid #111111; font-weight: 700; }
+/* 高亮（`==…==`）：报刊式反白 —— 黑底白字，比任何荧光笔都更「头条」。 */
+mark { color: #ffffff; background: #111111; border-radius: 0; padding: 0 0.2em; }
+/* 加粗只动字重 —— 原来是「纯黑 + 900 + 灰色下划线」三重叠加，三条最刺眼的行就是它，
+   也是「跳变很强烈」最直接的来源；「底」这个视觉手段留给 mark（下面的反白）。 */
+strong { color: #000000; font-weight: 700; }
+/* 行内代码：不加边框（长代码换行时边框会碎成一段一段），报纸式浅灰底即可；
+   box-decoration-break: clone 让换行后每一行都有完整的底色包边。 */
+p code, li code { color: #111111; background: #ececec; border: none; border-radius: 0; padding: 0.08em 0.3em; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+/* `!important` 是必需的：writing.css 在浅色界面下用 `:root:not([data-theme='dark'])`
+   前缀（特异度 0,4,1）把代码面钉成冷灰 #f3f5f7 + 深灰字，主题这里只有 2 个 class，
+   压不过它 —— 不夺回来的后果是这套主题的浅灰代码面（报纸上的一块灰版）根本不出现，
+   而且字号/行高也跟着应用的兜底走。 */
+pre { background: #f2f2f2 !important; border: 2px solid #111111; border-radius: 0; color: #111111 !important; box-shadow: none; }
+pre code { color: #111111; }
+table { border-top: 3px solid #111111; border-bottom: 3px solid #111111; }
+table th, table td { border: 1px solid #111111; color: #111111; }
+table th { background: #111111; color: #ffffff; font-weight: 700; }
+hr { border: none; border-top: 4px double #111111; margin: 1.4em 0; opacity: 1; }
+/* 图片：报刊照片不描框、不留圆角，硬边即可。 */
+img { border: 0; border-radius: 0; background: #ffffff; }
+.hljs-keyword { color: #000000; font-weight: 700; }
+.hljs-string { color: #333333; }
+.hljs-number { color: #000000; }
+.hljs-comment { color: #777777; font-style: italic; }
+.hljs-function { color: #000000; font-weight: 700; }
+/* 报眉双线写在 h2 上，编辑器与公众号导出共用；编辑器里只把段距归零，
+   章节的上下节奏交给版心（.pm-readable-block）管。 */
+.pm-heading-2 { margin: 0; }
+.pm-readable-block { border-bottom: 1px dotted #d8d8d8; padding-bottom: 0.2em; }
+.pm-blockquote { background: #ffffff; border: 2px solid #111111; padding: 0.2em 0.35em; }
+.pm-table-block { padding: 0.1em 0; }
+.wechat-block-summaryCard { border: 2px solid #111111; background: #ffffff; box-shadow: 5px 5px 0 #111111; }
+.wechat-block-quoteCard blockquote { border: 2px solid #111111; background: #f7f7f7; }
+.wechat-block-actionButton p { background: #111111; }
+.wechat-block-qrCode { border: 2px dashed #111111; background: #ffffff; }
+/* 报尾（正文末尾的「报 · 第 001 期」）已移除：那行期号与文章内容无关，每篇都挂一遍
+   只是噪音，且期号写死在 CSS 里也改不动。 */
+
+/* 目录（正文里手写的 `[TOC]`）：报纸的「本期要目」—— 黑框方角，标题走反白黑条，
+   与表头同一套语言。 */
+.pm-toc { margin: 0 0 1.4em; padding: 0; border: 1px solid #111111; border-radius: 0; background: transparent; }
+.pm-toc-title { margin: 0; padding: 0.35em 0.6em; font-size: 15px; font-weight: 700; letter-spacing: 4px; color: #ffffff; background: #111111; }
+.pm-toc-list { list-style: decimal; margin: 0; padding: 0.6em 1em 0.6em 2.2em; }
+.pm-toc-item { font-size: 15px; line-height: 1.8; }
+.pm-toc-link { color: #111111; border-bottom: 0; }
+
+/* @dark */
+/*
+黑夜模式：报纸翻到夜版。纸变近黑，报眉双线与描边改走白色，反白的表头反相成浅灰底
+黑字 —— 报刊的身份就是黑白对撞，暗底上继续用黑线会糊成一团。
+只进编辑器；公众号导出永远用上面的白纸版。
+*/
+:root { color: #EDEDED; background-color: #141414; }
+
+h1 { color: #FFFFFF; border-color: #FFFFFF; }
+
+h2 { color: #FFFFFF; border-color: #FFFFFF; }
+
+h3 { color: #FFFFFF; border-bottom-color: #FFFFFF; }
+
+p { color: #DCDCDC; }
+
+blockquote { border-top-color: #FFFFFF; border-bottom-color: #FFFFFF; background: #1E1E1E; }
+blockquote p { color: #EDEDED; }
+
+li { color: #DCDCDC; }
+
+a { color: #FFFFFF; border-bottom-color: #FFFFFF; }
+mark { color: #141414; background: #EDEDED; }
+img { background: #141414; }
+strong { color: #FFFFFF; }
+
+p code, li code { color: #EDEDED; background: #262626; }
+
+pre { background: #1E1E1E; border-color: #6E6E6E; color: #EDEDED; }
+pre code { color: #EDEDED; }
+
+table { border-top-color: #FFFFFF; border-bottom-color: #FFFFFF; }
+table th, table td { border-color: #4A4A4A; color: #EDEDED; }
+table th { background: #EDEDED; color: #111111; }
+
+hr { border-top-color: #FFFFFF; }
+
+.hljs-keyword { color: #FFFFFF; font-weight: 700; }
+.hljs-string { color: #B8B8B8; }
+.hljs-number { color: #FFFFFF; }
+.hljs-comment { color: #8A8A8A; font-style: italic; }
+.hljs-function { color: #FFFFFF; font-weight: 700; }
+
+.pm-readable-block { border-bottom-color: #3A3A3A; }
+.pm-blockquote { background: #1E1E1E; border-color: #6E6E6E; }
+
+.wechat-block-summaryCard { border-color: #6E6E6E; background: #1E1E1E; box-shadow: 5px 5px 0 #3A3A3A; }
+.wechat-block-quoteCard blockquote { border-color: #6E6E6E; background: #1E1E1E; }
+.wechat-block-actionButton p { background: #EDEDED; color: #111111; }
+.wechat-block-qrCode { border-color: #6E6E6E; background: #1E1E1E; }
+
+.pm-toc { border-color: #FFFFFF; }
+.pm-toc-title { color: #111111; background: #EDEDED; }
+.pm-toc-link { color: #EDEDED; }

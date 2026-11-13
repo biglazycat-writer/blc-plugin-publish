@@ -1,0 +1,21 @@
+# 依赖与工具缓存
+node_modules/
+.vite/
+coverage/
+*.log
+npm-debug.log*
+
+# 构建产物（由 npm run build 生成，不提交）
+dist/
+
+# 本机环境与编辑器
+.env
+.env.*
+.DS_Store
+.idea/
+.vscode/
+*.local
+
+# 插件运行时数据：账号配置与本地发布稿
+account.json
+article-*.json

@@ -1,0 +1,194 @@
+/*
+@name 默认主题
+@description 默认主题：冷调毛玻璃界面 + 琥珀色标题 + 白卡浮图，轻盈通透的浅色长文阅读
+@tags 默认,玻璃拟态,毛玻璃,浅色,长文,琥珀
+@accent #3B7DD8
+@accentSecondary #C08A2E
+
+设计口径（照参考图复刻，六张图共用的语言）：
+  0. ⚠️ 参考图里的蓝底格纹 / 彩虹 / 青绿渐变**不是**本主题的配色 —— 那是窗口半透明
+     穿透出来的**桌面壁纸**（实测纸面像素是 #E4EAEA / #C7DAE8 这种随位置变化的青蓝，
+     典型壁纸穿透特征）。大懒猫自带壁纸功能（data/wallpaper/），桌面底纹由应用按
+     :root[data-background=...] 自己注入。所以主题
+     **一个桌面底 token 都不写**，把桌面完全让给应用和用户选的壁纸。
+  1. 面板是「近白半透明玻璃」—— 冷调纸面 #FCFDFF，正文用中性偏冷的深灰，不是纯黑。
+  2. 标题是这套主题的识别点：正文里的章节标题取**琥珀金** #C08A2E（参考图
+     「What is a shader?」「Rasterisation」就是这个色）；文档主标题 h1 走深墨，
+     压一条暖色发丝线，避免整页都在发光。
+  3. 图片是「白卡浮图」—— 圆角 + 发丝描边 + 柔和冷投影。
+  4. 引用 / 代码块 / 表格 / 目录统一成同一套白卡：圆角 12–14px、发丝边、极浅投影。
+
+排版标定（2026-10-13 从参考图原图 1280×1929 实测，不是估的）：
+  · 正文栏宽 1172px，字号约 27px → 字号 / 栏宽 ≈ 0.023。大懒猫 A4 正文栏 650px，
+    对应约 15px；本主题取 16px（中文比西文需要略大一档才等价），比底座默认 18px 收一档。
+  · 行距（基线到基线）47px ÷ 27px ≈ **1.74**。中文取 1.8（中文比西文要多一点行距），
+    比上一版的 1.85 收紧 —— 上一版偏散，行与行之间「断气」。
+  · 段间距 50px − 行内带隙 21px ≈ 29px ≈ **1.05em**，落到 16px 正文就是 20px。
+    参考图的透气感主要来自段间距而不是行距，所以这版把块间距从 18px 提到 20px。
+  · 正文墨色实测最暗 3% 均值 L≈24（近黑），**加粗词也是 L≈24** —— 参考图里正文与加粗
+    是**同色**、只靠字重区分。所以 strong 压到近黑 #14181F，正文给 #333A45，
+    靠字重 + 明度双重区分（中文笔画密，纯靠字重不够）。
+  · 字距略松（几何无衬线自带 + 排版加了 tracking），取 0.3px；标题收到 0.1px。
+
+写作约束（按大懒猫正文层规范，浅色段一律遵守）：
+  · 字号全部写**绝对 px 整数**，不用 em / rem（否则会落到纸张 18px / 根字号 14px 上）。
+  · 不用渐变、@media、@keyframes、float、display:grid —— 公众号导出会整条丢掉。
+  · 颜色与尺寸上不用 var()；不用 counter()、不用 :nth-child。
+  · 代码面必须带 !important：writing.css 用 :root:not([data-theme='dark']) 前缀
+    把代码面钉死，不带 !important 压不过它，编辑器与导出会长得不一样。
+*/
+:root {
+  /* 正文用**霞鹜文楷**（LXGW WenKai）—— 大懒猫自带这套字体的 Light/Regular/Medium 三档
+     （内嵌 /fonts/editor/LXGWWenKai-*.woff2，声明为 family "LXGW WenKai"），
+     与应用默认的 --content-font-family 同一支：楷体的手写笔势就是这套主题的字面。
+     拉丁（英文/数字）也用文楷自带的 Klee 系字形，和中文同一支笔，不再混搭衬线。
+     ⚠️ 数字显式写 font-variant-numeric: lining-nums 兜底：万一文楷没加载、落回
+     系统衬线，Georgia 这类字体的旧式数字会下伸到基线以下，整行上下不齐。 */
+  font-family: "LXGW WenKai", "PingFang SC", "Microsoft YaHei", serif;
+  font-variant-numeric: lining-nums;
+  color: #333A45;
+  background: #FCFDFF;
+  line-height: 1.8;
+  letter-spacing: 0.3px;
+  word-break: normal;
+}
+
+/* 标题阶梯按全应用统一口径（h1 1.75 / h2 1.40 / h3 1.20 / h4 1.07 / h5 0.93 / h6 0.87
+   × 正文 16px），取整后就是下面这组。h1 深墨 + 暖发丝线，h2 起换琥珀金。
+   标题字距收到 0.1px：字号越大越不能松，否则标题会「散架」。 */
+h1 { color: #1B222B; font-size: 28px; font-weight: 700; line-height: 1.32; letter-spacing: 0.1px; text-align: left; border-bottom: 1px solid #E8DFC9; padding-bottom: 0.4em; }
+h2 { color: #C08A2E; font-size: 22px; font-weight: 700; line-height: 1.38; letter-spacing: 0.1px; text-align: left; border-bottom: 1px solid #F0E7D3; padding-bottom: 0.3em; }
+h3 { color: #C08A2E; font-size: 19px; font-weight: 700; line-height: 1.42; letter-spacing: 0.1px; text-align: left; }
+h4 { color: #C08A2E; font-size: 17px; font-weight: 700; line-height: 1.46; letter-spacing: 0.1px; text-align: left; }
+h5 { color: #A8843E; font-size: 15px; font-weight: 700; line-height: 1.5; letter-spacing: 0.1px; text-align: left; }
+h6 { color: #8F7A55; font-size: 14px; font-weight: 700; line-height: 1.5; letter-spacing: 0.1px; text-align: left; }
+
+/* 正文：中性偏冷深灰、1.8 行距、0.3px 字距，按词换行（参考图是西文排版口径）。 */
+p { color: #333A45; font-size: 16px; line-height: 1.8; letter-spacing: 0.3px; text-align: left; word-break: normal; overflow-wrap: break-word; }
+/* 加粗：压到近黑（参考图实测正文与加粗同色、只差字重；中文笔画密，光靠字重不够，
+   所以再压一档明度）。取 700：600 在微软雅黑上会被静默取整，两端观感不一致。 */
+strong { color: #14181F; font-weight: 700; letter-spacing: 0.3px; }
+/* 链接：冷蓝 + 一条浅蓝发丝下划线（呼应整套主题的「细线」语言，而不是裸色块）。 */
+a { color: #3B7DD8; text-decoration: none; border-bottom: 1px solid #C3D7F1; }
+/* 高亮（`==…==`）：参考图里 `vColor` 就是一块淡蓝紫芯片，这里照搬。 */
+mark { color: #22314A; background: #E7ECFA; border-radius: 4px; padding: 0 0.2em; }
+/* 脚注上标（参考图里 `vertex 18` `Buffer 2` 那种小蓝字）：跟链接同一支冷蓝。
+   字重取 700 而不是 600：CJK 字体只有 400 / 700 两档，600 会被静默取整成 700，
+   两端观感还不一致 —— 与 strong 同一条口径。 */
+sup { color: #3B7DD8; font-size: 12px; font-weight: 700; letter-spacing: 0; }
+
+/* 引用：一块浅蓝玻璃底 + 蓝色左发丝条。字号写死，否则 1em 会落到纸张的 18px。 */
+blockquote { color: #4C5A6B; font-size: 16px; background: #F5F8FC; border-left: 3px solid #9FC2EC; border-radius: 10px; padding: 0.9em 1.15em; }
+blockquote p { color: #4C5A6B; font-size: 16px; line-height: 1.78; }
+
+ul, ol { color: #333A45; font-size: 16px; line-height: 1.8; padding-left: 1.5em; }
+li { font-size: 16px; line-height: 1.8; letter-spacing: 0.3px; margin: 4px 0; }
+li::marker { color: #3B7DD8; font-weight: 700; }
+/* 任务列表（`- [ ]`）：底座已把勾选框重绘成圆角框，这里只对齐颜色。
+   编辑器与预览的类名不同（data-type / .mdTaskList），两边都要写。 */
+ul[data-type='taskList'] input[type='checkbox'], ul.mdTaskList input[type='checkbox'] { border-color: #C3D3E6; border-radius: 4px; }
+ul[data-type='taskList'] input[type='checkbox']:checked, ul.mdTaskList input[type='checkbox']:checked { background-color: #3B7DD8; border-color: #3B7DD8; }
+
+/* 行内代码：无描边的冷调浅灰蓝芯片。
+   带上 `td code` / `th code`：导出侧把单元格内容直接渲染成行内 HTML，没有 <p> 包裹，
+   只写 `p code` 的话表格里的行内代码在公众号里会掉样式。 */
+p code, li code, td code, th code { color: #2F3E52; background: #EDF1F8; border: 0; border-radius: 6px; padding: 0.18em 0.42em; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace; font-size: 14px; letter-spacing: 0; }
+
+/* 代码块：白卡 + 发丝边 + 极浅冷投影（参考图里的代码块就是一张浮在纸上的白卡）。
+   行高提到 1.7：等宽字体行距太紧会糊成一片。
+   !important 必需 —— writing.css 在浅色界面下用 :root:not([data-theme='dark']) 前缀
+   （特异度 0,4,1）把代码面钉成 #f3f5f7 并加了一圈描边与柔和阴影，主题这里只有 2 个
+   class 压不过它，后果是编辑器与公众号导出长得不一样。 */
+pre { background: #FFFFFF !important; color: #2A3746 !important; border: 1px solid #E1E8F1 !important; border-radius: 12px; box-shadow: 0 2px 12px rgba(30, 48, 76, 0.06) !important; padding: 17px 18px; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace; font-size: 13px; line-height: 1.7; letter-spacing: 0; overflow-x: auto; }
+pre code { color: inherit; background: none; border: 0; border-radius: 0; padding: 0; font-size: 100%; font-family: inherit; white-space: pre; }
+
+/* 圆角表格：必须 border-collapse: separate（collapse 下 border-radius 被忽略）。
+   外框交给 table，内部只画右 / 下分隔线，再用 :last-child 去掉与外框重叠的那一条
+   （:nth-child 在导出侧不支持）。表头两角补圆角，否则表头底色会把上方的圆角切成直角。 */
+table { background: #FFFFFF; border-collapse: separate; border-spacing: 0; border: 1px solid #E1E8F1; border-radius: 12px; font-size: 15px; line-height: 1.75; }
+table th, table td { border-right: 1px solid #EDF1F7; border-bottom: 1px solid #EDF1F7; padding: 9px 14px; text-align: left; }
+table th:last-child, table td:last-child { border-right: 0; }
+table tr:last-child td { border-bottom: 0; }
+table th { background: #F3F7FC; color: #2A313B; font-weight: 700; }
+table th:first-child { border-top-left-radius: 11px; }
+table th:last-child { border-top-right-radius: 11px; }
+
+/* 分隔线：一条居中的短圆条 —— macOS 面板里那种「细横杠」的分节感。
+   不用渐变（导出会丢），实色就够。 */
+hr { border: 0; width: 44px; height: 3px; margin: 2.2em auto; background: #DCE4EF; border-radius: 2px; }
+
+/* 图片：白卡浮图 —— 圆角 + 发丝描边 + 冷投影。
+   实测参考图的图卡底色是**纯白 #FFFFFF**、且卡片自带留白（示意图本身画在白底上），
+   所以**不再额外加 padding 白边** —— 那会在图卡外面再套一圈白框，白上叠白反而脏。
+   只留发丝边 + 投影负责「浮起来」：在实色白纸上，没有这两样卡片会看不见。 */
+img { border: 1px solid #E7EBF0; border-radius: 12px; background: #FFFFFF; box-shadow: 0 2px 12px rgba(30, 48, 76, 0.07); }
+
+/* 块间距：底座的 `.pm-block { margin: 0.58em 0 }` 特异度更高，间距必须写在这些 pm-* 类上，
+   光写 `p` 压不过。20px ≈ 参考图实测的 1.05em 段间距；标题上方给到 34px，
+   让「标题 → 正文」的层级靠留白而不是靠装饰撑起来。`.pm-first-block` 放最后：
+   文档首块不要顶部留白。 */
+.pm-block { margin: 0 0 20px; }
+.pm-heading-1, .pm-heading-2, .pm-heading-3, .pm-heading-4, .pm-heading-5, .pm-heading-6 { margin-top: 34px; margin-bottom: 16px; }
+.pm-first-block { margin-top: 0; }
+
+/* 目录（正文里手写的 `[TOC]`）：一张玻璃白卡，标题走琥珀小字 + 宽字距。 */
+.pm-toc { margin: 0 0 1.5em; padding: 1.05em 1.25em; border: 1px solid #E1E8F1; border-radius: 14px; background: #FFFFFF; box-shadow: 0 2px 12px rgba(30, 48, 76, 0.05); }
+.pm-toc-title { margin: 0 0 0.65em; font-size: 13px; font-weight: 700; line-height: 1.4; letter-spacing: 2px; color: #C08A2E; }
+.pm-toc-list { list-style: none; margin: 0; padding-left: 0; }
+.pm-toc-item { font-size: 16px; line-height: 1.9; }
+.pm-toc-link { color: #333A45; border-bottom: 0; }
+
+/* 公众号专用块：摘要卡跟白卡同一套语言，行动按钮用主题冷蓝。 */
+.wechat-block-summaryCard { border: 1px solid #E1E8F1; border-radius: 14px; background: #FFFFFF; box-shadow: 0 2px 12px rgba(30, 48, 76, 0.06); }
+.wechat-block-actionButton p { background: #3B7DD8; color: #FFFFFF; border-radius: 8px; }
+
+/* @dark */
+/*
+黑夜模式：整套翻成「深色玻璃」—— 墨蓝底 #141A22、正文 #C7D2DF、琥珀提亮成 #E0B45C、
+描边 #2A3340、代码面 #0E131A。冷蓝与琥珀这两支强调色在暗底上本来就好用，只把琥珀
+提亮一档、把白卡换成深卡，卡片语言（圆角 + 发丝边 + 投影）原样保留。
+这一段只进编辑器；公众号导出永远用上面的浅色版。
+浅色段用了 !important 的地方（代码面）这里必须同样带 —— 两者都重要时按加载顺序决胜。
+*/
+:root { color: #C7D2DF; background-color: #141A22; }
+
+h1 { color: #F0F4FA; border-bottom-color: #33404F; }
+h2 { color: #E0B45C; border-bottom-color: #33404F; }
+h3 { color: #E0B45C; }
+h4 { color: #E0B45C; }
+h5 { color: #C9A45F; }
+h6 { color: #A79A7E; }
+
+p { color: #C7D2DF; }
+strong { color: #F0F4FA; }
+a { color: #7FB0F0; border-bottom-color: #3A5375; }
+mark { color: #E4EBF7; background: #2A3550; }
+sup { color: #7FB0F0; }
+
+blockquote { color: #A9B6C6; background: #1B222C; border-left-color: #4E7099; }
+blockquote p { color: #A9B6C6; }
+
+ul, ol { color: #C7D2DF; }
+li::marker { color: #7FB0F0; }
+ul[data-type='taskList'] input[type='checkbox'], ul.mdTaskList input[type='checkbox'] { border-color: #4A586B; }
+ul[data-type='taskList'] input[type='checkbox']:checked, ul.mdTaskList input[type='checkbox']:checked { background-color: #4E8FE0; border-color: #4E8FE0; }
+
+p code, li code, td code, th code { color: #DCE5F0; background: #232C38; }
+
+pre { background: #0E131A !important; color: #D6DFEA !important; border-color: #2A3340 !important; box-shadow: 0 2px 12px rgba(0, 0, 0, 0.45) !important; }
+pre code { color: inherit; }
+
+table { background: #161D26; border-color: #2A3340; }
+table th, table td { border-color: #242D39; }
+table th { background: #1D2632; color: #E4EBF4; }
+
+/* 暗底上的分隔条要提亮一档，否则 #2A3340 贴在 #141A22 上等于看不见。 */
+hr { background: #3A4655; }
+img { border-color: #2A3340; background: #161D26; box-shadow: 0 2px 12px rgba(0, 0, 0, 0.45); }
+
+.wechat-block-summaryCard { border-color: #2A3340; background: #161D26; box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4); }
+.wechat-block-actionButton p { background: #4E8FE0; color: #0E1319; }
+
+.pm-toc { border-color: #2A3340; background: #161D26; box-shadow: 0 2px 12px rgba(0, 0, 0, 0.35); }
+.pm-toc-title { color: #E0B45C; }
+.pm-toc-link { color: #D6DFEA; }

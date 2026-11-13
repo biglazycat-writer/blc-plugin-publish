@@ -1,0 +1,236 @@
+/*
+@name 学术论文
+@description 仿 LaTeX 学术排版：衬线正文 + 分级黑体/楷体/仿宋标题 + 段间留白（不用首行缩进）+ 三线表
+@tags 学术,论文,LaTeX,衬线,宋体
+@accent #2E67D3
+@accentSecondary #8BB1F9
+*/
+/*
+移植自 Keldos-Li/typora-latex-theme（把 Typora 伪装成 LaTeX 的中文样式主题）的**排版骨架**。
+
+原主题的「LaTeX 味」几乎全部来自排版，而不是配色 —— 整篇只有黑字、白纸、一根灰线、
+一个蓝色链接。可移植的与不可移植的分得很清楚：
+
+  ✓ 可移植：Latin Modern（Computer Modern）衬线正文、分级中文字体（h1–h3 黑体 / h4 楷体 /
+    h5–h6 仿宋）、段间留白而非首行缩进、三线表、克制的配色、行内代码的「浅蓝描边圈」。
+  ✗ 不可移植（本仓库的 CSS 主题表达不了，见 docs/typora-latex-theme-port.md）：
+    ① 章节自动编号（`counter()` + `::before`）—— 编辑器里能算，公众号导出侧 juice 只能把
+       `content: counter(...)` 抄成内联样式，计数器链断掉，会变成「编辑器有号、发出去没号」；
+    ② 参考文献脚注 `［1］`（文档模型里没有脚注节点）；
+    ③ 目录的层级编号（目录要靠 layout token 生成真实元素，CSS 表达不了）；
+    ④ `@page` / `break-before` 分页（公众号没有「页」）。
+
+两条与原主题的**刻意差异**：
+  - 原主题 `--base-font-size: 9.5pt` 是 A4 打印口径（≈12.7px），屏幕阅读太小，这里按本应用的
+    A4 正文栏取 16px；标题阶梯在 2026-10-08 改成**全应用统一口径**（不再用原主题的
+    1.9 / 1.5 / 1.25），换主题时层级不再跳变。
+  - 原主题 `strong` 是 `font-weight: 900`，但中文字体极少真有 900 字重，浏览器会合成假粗体，
+    这里用 700（正常 bold），观感更稳。
+*/
+
+:root {
+  /* Latin Modern Roman = Computer Modern 的开源复刻，LaTeX 的「那张脸」；没装就退回 Times。
+     中文正文用宋体（原主题：华文宋体 / 宋体-简 / Songti SC）。 */
+  font-family: "Latin Modern Roman", "CMU Serif", "New Computer Modern", Georgia, "Times New Roman", "Source Han Serif SC", "Noto Serif CJK SC", "Songti SC", SimSun, serif;
+  color: #1a1a1a;
+  background-color: #ffffff;
+  letter-spacing: 0;
+  word-break: normal;
+}
+
+/* 标题：西文衬线（Latin Modern Bold）+ 中文黑体，分级靠**字号缓降 + 字体切换**而不是一路放大 ——
+   这是 LaTeX 与网页主题最大的区别（网页 h1 常常是正文的两倍多）。h1 居中且**不加任何线**
+   （LaTeX 的 \section 就是一顶居中的大标题），与本应用其它主题「h1 必带下划线」正好相反。 */
+h1, h2, h3, h4, h5, h6 {
+  color: #000000;
+  font-family: "Latin Modern Roman", "CMU Serif", Georgia, "Times New Roman", "Source Han Sans SC", "Noto Sans CJK SC", "PingFang SC", "Microsoft YaHei", SimHei, sans-serif;
+  font-weight: 700;
+  text-align: left;
+  line-height: 1.4;
+  letter-spacing: 0;
+}
+h1 { font-size: 28px; text-align: center; line-height: 1.35; }
+h2 { font-size: 22px; }
+h3 { font-size: 20px; }
+/* h4 楷体、h5/h6 仿宋：层级越低越「轻」，用字体区分（原主题的分级中文字体做法）。
+   阶梯按全应用统一口径（1.75 / 1.375 / 1.25 / 1.125 / 0.94 / 0.875 × 正文），
+   不再沿用原主题的 1.9 / 1.5 / 1.25 —— 各主题标题跨度差 0.35 倍正是用户报的
+   「换主题像换了一套排版」。 */
+h4 { font-size: 18px; font-family: "Latin Modern Roman", Georgia, "Times New Roman", "LXGW WenKai", KaiTi, STKaiti, "Kaiti SC", serif; }
+h5 { font-size: 15px; font-family: "Latin Modern Roman", Georgia, "Times New Roman", FangSong, "FangSong_GB2312", STFangsong, "Songti SC", SimSun, serif; }
+h6 { font-size: 14px; font-family: "Latin Modern Roman", Georgia, "Times New Roman", FangSong, "FangSong_GB2312", STFangsong, "Songti SC", SimSun, serif; }
+
+/* 正文：左对齐（原主题就是 left，不是 justify）、行高 1.62（原主题的黄金比 1.618），
+   **不做首行缩进** —— LaTeX 用段间距分节，所以也就顺带躲开了「段内含换行的块被整块缩进」
+   那个坑（见 docs/desktop-themes.md 的 pm-line-block 一节）。段距交给下面的 .pm-block。 */
+p {
+  color: #1a1a1a;
+  font-size: 16px;
+  line-height: 1.62;
+  letter-spacing: 0;
+  text-align: left;
+  word-break: normal;
+  overflow-wrap: break-word;
+}
+strong { color: #000000; font-weight: 700; }
+
+/* 引用：仿宋（原主题用华文仿宋）+ 一根中性灰竖条，**没有底色、没有圆角** ——
+   与本应用底座那张灰底圆角引用卡完全不同，是「书中引文」而不是「聊天气泡」。 */
+blockquote {
+  color: #666666;
+  font-family: "Latin Modern Roman", Georgia, "Times New Roman", FangSong, "FangSong_GB2312", STFangsong, "Songti SC", SimSun, serif;
+  font-size: 17px;
+  font-style: normal;
+  line-height: 1.62;
+  background: transparent;
+  border-left: 4px solid #b3b3b3;
+  border-radius: 0;
+  padding: 0.15em 2em 0.15em 1.85em;
+}
+blockquote p { color: #666666; font-size: 17px; }
+
+ul, ol {
+  color: #1a1a1a;
+  font-size: 16px;
+  line-height: 1.62;
+  letter-spacing: 0;
+  padding-left: 2em;
+  margin: 0.6em 0;
+}
+li { font-size: 16px; line-height: 1.62; letter-spacing: 0; }
+
+/* 勾选框（`- [ ]`）压回**方框**。
+   LaTeX 学术排版里的勾选框一律是方的：`amssymb` 的 \square、`wasysym` 的 \Square、
+   `hyperref` 的 \CheckBox 表单域、`fontawesome5` 的 \faSquare 全是方框；Unicode 也把它
+   定义成 U+2610 BALLOT BOX（方框）。圆形在 LaTeX 里是选项圈选/批改符号，不是勾选框。
+   原 Typora 主题的 `list.scss` 只调尺寸和位置（`width/height: 1em`、`margin-left: -1.5em`），
+   形状交给浏览器原生 checkbox —— 原生就是方的。而本应用的底座把 `input[type=checkbox]`
+   改成了 `appearance: none` + `border-radius: 5px`（style.css），不覆盖就会继承成圆角
+   方框，15px 见方、1/3 圆角，缩略看就是个圆。留 1px 圆角只是为了别让抗锯齿把角啃出毛边。
+   只写裸标签 `input`：正文里除了勾选框没有别的表单控件。 */
+input { border-radius: 1px; }
+
+/* 链接：原主题的 #2E67D3，蓝得像论文 PDF 里的超链接。 */
+a { color: #2E67D3; text-decoration: none; border-bottom: 1px solid #b8c9ee; }
+
+/* 高亮：LaTeX 的 \hl 那支黄荧光笔，暖黄不与蓝链接抢。 */
+mark { color: #4a3526; background: #fdf0c4; border-radius: 2px; padding: 0 2px; }
+
+/* 行内代码：浅蓝字 + **白底 + 1px 浅蓝描边圈**（原主题用 box-shadow 画圈，不是 border，
+   这样不占布局宽度、不会被挤行）。`td code` / `th code` 不能省 —— 导出侧单元格内容
+   没有 <p> 包裹，只写 `p code` 会在公众号里掉样式。 */
+p code, li code, td code, th code {
+  color: #3C70C6;
+  background: #fefefe;
+  border: 0;
+  border-radius: 2px;
+  box-shadow: 0 0 1px 1px #c8d3df;
+  margin: 0 2px;
+  padding: 0 2px;
+  font-family: "Latin Modern Mono", "CMU Typewriter Text", ui-monospace, "Sarasa Mono SC", Consolas, "Courier New", monospace;
+  font-size: 15px;
+  letter-spacing: 0;
+}
+
+/* 代码块：浅灰纸面 + 1px 灰边，无阴影、2px 小圆角 —— 原主题的代码面本身很朴素。
+   四条 `!important` 一个都不能少：writing.css 在浅色界面下用 `:root:not([data-theme='dark'])`
+   前缀（特异度 0,4,1）把代码面钉成冷灰并加了描边与阴影，主题只有 2 个 class 压不过它。
+   `pre code { color: inherit }` 是防「底色被兜底改、字色留在主题」那个隐形 bug 的。 */
+pre {
+  background: #fafafa !important;
+  color: #1a1a1a !important;
+  border: 1px solid #d0d0d0 !important;
+  box-shadow: none !important;
+  border-radius: 2px;
+  padding: 12px 14px;
+  font-family: "Latin Modern Mono", "CMU Typewriter Text", ui-monospace, "Sarasa Mono SC", Consolas, "Courier New", monospace;
+  font-size: 14px;
+  line-height: 1.6;
+  letter-spacing: 0;
+  overflow-x: auto;
+}
+pre code { color: inherit; background: none; border: 0; border-radius: 0; padding: 0; font-size: 100%; font-family: inherit; white-space: pre; }
+
+/* 三线表（学术表的正字法）：只有顶线、表头下线、底线三条黑线，没有竖线、没有单元格框。
+   原主题的表头用标题字体、整表居中 —— 这里都照做。
+   `td p, th p` 与 `table th, table td` **两条都要写**：编辑器里单元格内容是 <p>，
+   导出侧直接渲染行内 HTML、没有 <p>，少写一条就有一端不居中。 */
+table {
+  color: #1a1a1a;
+  background: transparent;
+  border-collapse: collapse;
+  border-top: 1.5px solid #1a1a1a;
+  border-bottom: 1.5px solid #1a1a1a;
+  font-size: 15px;
+  line-height: 1.6;
+  margin: 1em 0;
+}
+table th, table td { border: 0; padding: 6px 14px; text-align: center; }
+/* 三线表的表头不能有底色：应用给 `th` 默认垫了一层 `--fill-strong`，不写回 transparent
+   就变成「三线表 + 灰表头」的混搭。 */
+table th { color: #000000; background: transparent; border-bottom: 1px solid #1a1a1a; font-weight: 700; }
+td p, th p { text-align: center; text-indent: 0; }
+
+hr { border: 0; height: 1px; background: #cccccc; margin: 1.8em 0; }
+
+/* 图片：论文插图是「素图」—— 不加边框、不加阴影，只有 2px 圆角收一下边。 */
+img { border: 0; border-radius: 2px; box-shadow: none; background: transparent; padding: 0; }
+
+/* 块间距：段距 1em（原主题的 1em 段间留白）；标题上方留白大、下方贴近正文。
+   必须写在 `.pm-*` 上：底座的 `.pm-block { margin: 0.58em 0 }` 是 (0,3,0)，光写 `p` 压不过。
+   `.pm-first-block` 放最后 —— 文档首块不要顶部留白。 */
+.pm-block { margin: 0 0 1em; }
+.pm-heading-1 { margin-top: 1.5em; margin-bottom: 0.8em; }
+.pm-heading-2 { margin-top: 1.3em; margin-bottom: 0.6em; }
+.pm-heading-3 { margin-top: 1.1em; margin-bottom: 0.5em; }
+.pm-heading-4, .pm-heading-5, .pm-heading-6 { margin-top: 1em; margin-bottom: 0.45em; }
+.pm-first-block { margin-top: 0; }
+
+/* 目录（正文里手写的 `[TOC]`）：仿 LaTeX 的 `\tableofcontents` —— 居中「目录」小标题 +
+   编号条目，**不画框**（LaTeX 的目录就是一页素面正文，框是 Word 的做法）。
+   条目只收 H2，口径与应用侧一致。 */
+.pm-toc { margin: 0 0 1.8em; padding: 0; border: 0; background: transparent; }
+.pm-toc-title {
+  margin: 0 0 0.9em;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 6px;
+  text-align: center;
+  color: #1a1a1a;
+}
+.pm-toc-list { list-style: decimal; margin: 0; padding-left: 2.4em; }
+.pm-toc-item { font-size: 16px; line-height: 1.62; }
+.pm-toc-link { color: #1a1a1a; border-bottom: 0; }
+
+/* @dark */
+/*
+黑夜模式：原主题的 #1e1e1e / #ddd，链接提到 #8bb1f9，代码面比纸面再深一档。
+深色段只覆盖颜色，版式一律留在上面（浅色段在黑夜模式下仍然注入）。
+浅色段用了 `!important` 的代码面，这里必须同样带 —— 两者都重要时按加载顺序决胜。
+*/
+:root { color: #dcdcdc; background-color: #1e1e1e; }
+
+h1, h2, h3, h4, h5, h6 { color: #f0f0f0; }
+
+p { color: #dcdcdc; }
+strong { color: #ffffff; }
+
+a { color: #8bb1f9; border-bottom-color: #3d5a8a; }
+mark { color: #f0e2c0; background: #4a3f22; }
+
+blockquote { color: #b0b0b0; border-left-color: #666666; background: transparent; }
+blockquote p { color: #b0b0b0; }
+
+ul, ol { color: #dcdcdc; }
+
+p code, li code, td code, th code { color: #8bb1f9; background: #161616; box-shadow: 0 0 1px 1px #2e2e2e; }
+
+pre { background: #161616 !important; color: #dcdcdc !important; border-color: #333333 !important; box-shadow: none !important; }
+pre code { color: inherit; }
+
+table { color: #dcdcdc; border-top-color: #666666; border-bottom-color: #666666; }
+table th { color: #f0f0f0; background: transparent; border-bottom-color: #666666; }
+
+hr { background: #3a3a3a; }
+
+.pm-toc-title, .pm-toc-link { color: #dcdcdc; }

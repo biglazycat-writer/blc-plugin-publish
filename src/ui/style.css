@@ -1,0 +1,62 @@
+:root {
+  font-family: system-ui, 'Microsoft YaHei', sans-serif;
+  color: var(--text-primary);
+  background: var(--bg-base);
+  --bg: #fff; --bg-base: #f5f6f8; --bg-surface: #fff; --bg-elevated: #f6f7f9;
+  --bg-sunken: #edf0f5; --frame-surface: #f6f7f9;
+  --text: #202733; --text-primary: #202733; --text-muted: #687386;
+  --text-secondary: #687386; --text-tertiary: #8490a0; --text-quaternary: #a6afbb;
+  --text-disabled: #a6afbb; --text-danger: #ad3428;
+  --border: #dfe3ea; --border-default: #dfe3ea; --border-light: #e8ebf0;
+  --border-subtle: #dfe3ea; --border-minimal: #e8ebf0; --border-strong: #bbc5d3;
+  --accent: #3369b8; --accent-primary: #3369b8; --color-primary: #3369b8;
+  --color-primary-bg: #e8f0fc; --color-primary-light: #b1c6e5;
+  --fill-subtle: #f7f8fa; --fill-light: #f0f3f8; --fill-moderate: #e8edf4; --fill-strong: #dbe4f1;
+  --fs-body: 14px; --fs-title: 16px; --fs-ui: 13px; --fs-meta: 12px; --fs-micro: 11px;
+  --radius-lg: 10px; --radius-md: 6px; --ease-enter: .16s ease; --ease-fast: .12s ease;
+}
+* { box-sizing: border-box; }
+body { margin: 0; }
+button, input, select, textarea { font: inherit; }
+button {
+  cursor: pointer; padding: 7px 12px; color: inherit;
+  background: var(--bg-surface); border: 1px solid var(--border-default); border-radius: 6px;
+}
+button:disabled { opacity: .5; cursor: default; }
+input, select, textarea {
+  padding: 8px; border: 1px solid var(--border-default); border-radius: 5px;
+  color: inherit; background: var(--bg-surface);
+}
+.publisher { height: 100vh; display: flex; flex-direction: column; min-width: 0; }
+.publisherHeader {
+  display: flex; align-items: center; gap: 20px; flex: 0 0 auto;
+  padding: 14px 22px; background: var(--bg-surface); border-bottom: 1px solid var(--border-default);
+}
+.publisherHeader > div { margin-right: auto; }
+.publisherHeader strong { display: block; }
+.publisherHeader small { font-size: 11px; color: var(--text-secondary); }
+.publisherHeader nav { display: flex; gap: 6px; }
+.publisherHeader [aria-current=page] { background: var(--color-primary-bg); border-color: var(--color-primary-light); }
+.publisherHeader label { font-size: 12px; }
+.publisher > .wechatPublishWorkspace { flex: 1; min-height: 0; }
+.accountSettings { padding: 24px; max-width: 860px; margin: 0 auto; overflow: auto; width: 100%; }
+.settingsPanel { padding: 24px; background: var(--bg-surface); border: 1px solid var(--border-default); border-radius: 10px; margin-bottom: 18px; }
+.settingsPanel h3 { margin: 0 0 8px; }
+.settingsPanel p, .settingsHint { font-size: 13px; line-height: 1.65; color: var(--text-secondary); }
+.settingsPanel label { display: block; margin: 16px 0; }
+.settingsPanel input:not([type=checkbox]) { display: block; width: 100%; margin-top: 6px; }
+.settingsPanel button { margin: 0; flex: none; }
+.settingsOk { color: #207149; padding: 10px; }
+.settingsErr { color: var(--text-danger); padding: 10px; overflow-wrap: anywhere; }
+.settingsSectionHead { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 16px; justify-content: space-between; }
+.settingsSectionHead > div { flex: 1 1 240px; min-width: 0; }
+.settingsActions { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; padding-top: 4px; }
+.wechatPublishBody { height: 100%; min-height: 0; }
+@media (max-width: 1000px) {
+  .publisherHeader { flex-wrap: wrap; gap: 10px; }
+  .publisherHeader label { margin-left: auto; }
+}
+@media (max-width: 640px) {
+  .accountSettings { padding: 16px; }
+  .settingsPanel { padding: 18px; }
+}

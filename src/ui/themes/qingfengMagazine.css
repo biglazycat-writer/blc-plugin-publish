@@ -1,0 +1,212 @@
+/*
+@name 清风·杂志
+@description 森林绿与暖纸色的清新杂志排版，适合散文、随笔与长篇文章
+@tags 清新,杂志,森林绿,暖纸
+@accent #5B7F67
+@accentSecondary #E8EEE8
+@bg #FCFBF9
+
+字号一律写**绝对 px**：`em` 会落到应用纸张的 `--editor-font-size`（18px）、`rem` 落到应用根
+字号（14px），都不是「正文的 1 倍」，还会算出小数 —— 行内 code 的 `0.9em` 算成 16.2px，
+而工具栏字号框读 `getComputedStyle`，会把 16.2 原样显示给用户。
+*/
+
+:root {
+  color: #3B3A36;
+  background-color: #FCFBF9;
+  font-family: "Helvetica Neue", Arial, "PingFang SC", "Microsoft YaHei", sans-serif;
+  line-height: 1.8;
+  letter-spacing: 0.02em;
+  word-spacing: 0.25em;
+}
+
+h1 {
+  color: #3B3A36;
+  text-align: center;
+  font-family: Georgia, "Times New Roman", "Noto Serif CJK SC", SimSun, serif;
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.35;
+  letter-spacing: 0.04em;
+  margin: 1.2em 0 1.15em;
+  padding: 0 0 0.45em;
+  border-bottom: 2px solid #5B7F67;
+}
+
+h2 {
+  color: #4B6D57;
+  font-family: Georgia, "Times New Roman", "Noto Serif CJK SC", SimSun, serif;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.45;
+  margin: 1.2em 0 0.65em;
+  padding: 0.18em 0 0.18em 0.65em;
+  border-left: 5px solid #5B7F67;
+}
+
+h3 {
+  color: #5B7F67;
+  font-family: Georgia, "Times New Roman", "Noto Serif CJK SC", SimSun, serif;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.5;
+  margin: 1em 0 0.55em;
+}
+
+h4, h5, h6 { color: #4B6D57; font-family: Georgia, "Times New Roman", "Noto Serif CJK SC", SimSun, serif; }
+
+p {
+  color: #3B3A36;
+  font-size: 16px;
+  line-height: 1.8;
+  letter-spacing: 0.02em;
+  text-align: justify;
+  text-justify: inter-ideograph;
+  margin-bottom: 0.75em;
+}
+
+strong { color: #35533F; font-weight: 700; }
+a { color: #4B6D57; border-bottom: 1px solid #5B7F67; text-decoration: none; }
+
+blockquote {
+  position: relative;
+  color: #68675F;
+  background: #F5F4EF;
+  border-left: 3px solid #5B7F67;
+  border-radius: 0 8px 8px 0;
+  padding: 0.9em 1.1em;
+  margin: 1em 0;
+}
+blockquote::before {
+  content: "“";
+  display: block;
+  color: #5B7F67;
+  opacity: 0.22;
+  font-family: Georgia, serif;
+  font-size: 45px;
+  line-height: 0.8;
+  margin-bottom: -0.4em;
+}
+/* 引用段不再用 `font-style: italic`：中文没有真斜体，浏览器会把整段字形强行倾斜、
+   笔画发糊 —— 一段引用本来就长，糊一屏是最难受的一种「跳变」。区分靠底色 + 左绿线 +
+   大引号 + 灰字，已经够了。 */
+blockquote p { color: #68675F; font-size: 15px; line-height: 1.8; margin-bottom: 0.3em; }
+
+ul, ol { color: #3B3A36; padding-left: 1.8em; line-height: 1.8; }
+li { color: #3B3A36; margin-bottom: 0.2em; }
+ol li::marker { color: #5B7F67; font-family: Arial, sans-serif; font-weight: 700; }
+ul li::marker { color: #5B7F67; }
+
+input[type="checkbox"] { accent-color: #5B7F67; }
+ul[data-type="taskList"] > li > label input[type="checkbox"] { border: 1px solid #9BAFA0; border-radius: 3px; }
+li[data-checked="true"] { color: #77766E; text-decoration: line-through; text-decoration-color: #9BAFA0; }
+
+mark { color: #35533F; background: #E8EEE8; border-radius: 3px; padding: 0 0.15em; }
+p code, li code, td code, th code {
+  color: #35533F;
+  background: #E8EEE8;
+  border: 1px solid #C8D7CA;
+  border-radius: 3px;
+  padding: 0.1em 0.3em;
+  font-family: "Fira Code", Monaco, Consolas, monospace;
+  /* 原来是 16px —— 和正文一模一样大，读者看不出这是代码。压到 0.94 倍。 */
+  font-size: 15px;
+  letter-spacing: 0;
+  word-spacing: 0;
+}
+
+pre {
+  background: #2D312E !important;
+  color: #E8EEE8 !important;
+  border: 1px solid #5B7F67 !important;
+  border-radius: 6px;
+  padding: 1em;
+  font-family: "Fira Code", Monaco, Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.6;
+  box-shadow: 0 4px 14px rgba(45, 49, 46, 0.14) !important;
+}
+pre code { color: inherit; background: none; border: 0; padding: 0; font-family: inherit; }
+.hljs-keyword { color: #B9D7BE; font-weight: 700; }
+.hljs-string { color: #D8C99B; }
+.hljs-number { color: #A8C9B0; }
+.hljs-comment { color: #9AA79D; font-style: italic; }
+.hljs-function { color: #E8EEE8; font-weight: 700; }
+
+table {
+  width: 100%;
+  box-sizing: border-box;
+  border-collapse: separate;
+  border-spacing: 0;
+  color: #3B3A36;
+  background: #FFFFFF;
+  border: 1px solid #D5DED6;
+  border-radius: 6px;
+  box-shadow: 0 3px 12px rgba(91, 127, 103, 0.1);
+  overflow: hidden;
+}
+table th, table td { color: #3B3A36; border-bottom: 1px solid #E2E7E2; padding: 0.55em 0.75em; }
+table th { color: #42634D; background: #E8EEE8; font-weight: 700; border-bottom-color: #B8CDBB; }
+table tr:nth-child(2n) td { background: #F5F4EF; }
+table tr:hover td { background: #EEF4EE; }
+
+img { display: block; max-width: 100%; margin: 0.9em auto; border-radius: 6px; background: #FFFFFF; box-shadow: 0 3px 12px rgba(59, 58, 54, 0.14); }
+hr { border: none; border-top: 1px dashed rgba(91, 127, 103, 0.6); margin: 1.5em 0; }
+
+.pm-block { margin: 0 0 0.75em; }
+.pm-heading-1, .pm-heading-2, .pm-heading-3, .pm-heading-4, .pm-heading-5, .pm-heading-6 { margin-top: 1.1em; margin-bottom: 0.65em; }
+.pm-first-block { margin-top: 0; }
+.pm-readable-block { border-bottom: 1px solid rgba(91, 127, 103, 0.12); padding-bottom: 0.15em; }
+.pm-blockquote { background: #F5F4EF; border-left: 3px solid #5B7F67; border-radius: 0 8px 8px 0; }
+.wechat-block-summaryCard { border: 1px solid #D5DED6; background: #FFFFFF; box-shadow: 0 3px 12px rgba(91, 127, 103, 0.1); }
+.wechat-block-quoteCard blockquote { background: #F5F4EF; }
+.wechat-block-actionButton p { color: #FFFFFF; background: #5B7F67; border-radius: 4px; }
+.wechat-block-qrCode { border: 1px dashed #9BAFA0; background: #FFFFFF; }
+
+/* 目录（正文里手写的 `[TOC]`）：杂志的目录页 —— 暖纸底 + 左侧细绿线，序号走主题绿。 */
+.pm-toc { margin: 0 0 1.6em; padding: 0.9em 1.1em; border: 0; border-left: 3px solid #5B7F67; background: #F5F4EF; border-radius: 0 8px 8px 0; }
+.pm-toc-title { margin: 0 0 0.5em; font-size: 13px; font-weight: 700; letter-spacing: 3px; color: #42634D; }
+.pm-toc-list { list-style: decimal; margin: 0; padding-left: 1.7em; }
+.pm-toc-item { font-size: 16px; line-height: 1.8; }
+.pm-toc-link { color: #3B3A36; border-bottom: 0; }
+
+/* @dark */
+:root { color: #E8EEE8; background-color: #1D2420; }
+h1 { color: #E8EEE8; border-bottom-color: #8FB499; }
+h2 { color: #B9D7BE; border-left-color: #8FB499; }
+h3, h4, h5, h6 { color: #B9D7BE; }
+p { color: #D7E0D8; }
+strong { color: #CBE3CF; }
+a { color: #B9D7BE; border-bottom-color: #8FB499; }
+blockquote { color: #BAC8BC; background: #27312A; border-left-color: #8FB499; }
+blockquote::before { color: #8FB499; }
+ul[data-type="taskList"] > li > label input[type="checkbox"] { border-color: #66806D; }
+blockquote p { color: #BAC8BC; }
+ul, ol, li { color: #D7E0D8; }
+ol li::marker, ul li::marker { color: #8FB499; }
+li[data-checked="true"] { color: #9AA79D; text-decoration-color: #66806D; }
+mark { color: #D7E0D8; background: #35533F; }
+p code, li code, td code, th code { color: #D7E0D8; background: #35533F; border-color: #66806D; }
+pre { background: #2D312E !important; color: #E8EEE8 !important; border-color: #8FB499 !important; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.28) !important; }
+.hljs-keyword { color: #B9D7BE; }
+.hljs-string { color: #D8C99B; }
+.hljs-number { color: #A8C9B0; }
+.hljs-comment { color: #9AA79D; }
+.hljs-function { color: #E8EEE8; }
+table { color: #D7E0D8; background: #27312A; border-color: #516458; }
+table th, table td { color: #D7E0D8; border-bottom-color: #405246; }
+table th { color: #E8EEE8; background: #35533F; border-bottom-color: #66806D; }
+table tr:nth-child(2n) td { background: #222B25; }
+table tr:hover td { background: #304238; }
+img { background: #27312A; box-shadow: 0 3px 12px rgba(0, 0, 0, 0.35); }
+hr { border-top-color: rgba(143, 180, 153, 0.65); }
+.pm-readable-block { border-bottom-color: rgba(143, 180, 153, 0.18); }
+.pm-blockquote { background: #27312A; border-left-color: #8FB499; }
+.wechat-block-summaryCard { border-color: #516458; background: #27312A; box-shadow: 0 3px 12px rgba(0, 0, 0, 0.28); }
+.wechat-block-quoteCard blockquote { background: #27312A; }
+.wechat-block-actionButton p { color: #1D2420; background: #8FB499; }
+.wechat-block-qrCode { border-color: #66806D; background: #27312A; }
+
+.pm-toc { border-left-color: #8FB499; background: #27312A; }
+.pm-toc-title { color: #B9D7BE; }
+.pm-toc-link { color: #D7E0D8; }

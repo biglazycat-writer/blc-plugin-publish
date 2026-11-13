@@ -1,0 +1,127 @@
+/*
+@name 薄荷卡片
+@description 硬阴影白卡 + 黑色描边 + 荧光笔划重点，适合工具对比、创意评测
+@tags 卡片,测评,工具对比,硬阴影
+@accent #059669
+@accentSecondary #FDE68A
+
+硬阴影的绿必须**低彩度**（2026-10-09 用户反馈「发光的绿不便于阅读」后改）：
+
+  原先是 `#A7F3D0` / `#D1FAE5`（emerald 200 / 100）。这两个色本身不深，但**彩度极高**，
+  而纸面 `#F8FAFC` 与正文 `#374151` 都是中性色 —— 于是整页彩度最高的东西变成了贴在
+  代码块和标题卡右下角的那条实色带。它没有渐变、没有过渡，又是一条 5px 的等宽色块，
+  在长代码块上沿着参差的右端反复出现：眼睛每扫一行都被边缘拉走一次，这就是「发光感」的
+  来源，而不是亮度（它的亮度差只有 1.1:1，几乎不构成轮廓）。
+
+  改法：**大面积只留低彩度薄荷灰**（`#DCEAE2` / `#E7F1EB`，彩度降到原来的 1/6 左右，
+  与纸面仍是同一支色相），高彩度薄荷（`#059669` / `#A7F3D0`）只留给**小面积强调** ——
+  表头、列表符、h2 左竖线、`==高亮==`。硬阴影的几何（偏移量、圆角、黑描边）一律不动，
+  卡片语言照旧；同一套判断在 `img` 上已经用过一次（2026-09-29「太吵」）。
+*/
+:root { color: #1F2937; background: #F8FAFC; line-height: 1.88; letter-spacing: 0.4px; }
+h1 { color: #111827; text-align: left; font-weight: 700; background: #ffffff; border: 2px solid #111827; border-radius: 10px; box-shadow: 6px 6px 0 #DCEAE2; padding: 0.75em 0.85em; }
+h2 { color: #111827; background: #ffffff; border: 1px solid #111827; border-left: 8px solid #059669; border-radius: 8px; box-shadow: 4px 4px 0 #E7F1EB; padding: 0.4em 0.75em; font-weight: 700; }
+h3 { color: #111827; border-bottom: 3px solid #FDE68A; width: fit-content; }
+p { color: #374151; text-align: justify; text-justify: inter-ideograph; }
+/* 加粗只动字重。原来是「黑字 + 荧光黄底」，和 `==高亮==` 的语义完全撞车 ——
+   用户没有任何视觉手段区分「我加粗了」和「我高亮了」。黄底留给 mark，绿底留给行内代码。 */
+strong { color: #111827; font-weight: 700; }
+a { color: #059669; border-bottom-color: #059669; font-weight: 700; }
+/* 高亮（`==…==`）用薄荷荧光底，和荧光黄的行内代码区分开 —— 黄是「代码」，绿是「重点」。 */
+mark { color: #111827; background: #A7F3D0; border-radius: 4px; padding: 0 0.15em; }
+/* 图片：只留圆角和一层柔和投影。曾经套过「2px 黑描边 + 薄荷硬阴影」，用户反馈太吵
+   （2026-09-29）—— 卡片语言留给标题和代码块，图片本身不该抢戏。 */
+img { border: 0; border-radius: 8px; box-shadow: 0 2px 10px rgba(17, 24, 39, 0.1); background: #ffffff; }
+blockquote { background: #ffffff; border: 1px dashed #111827; border-radius: 10px; padding: 0.85em 1em; box-shadow: 4px 4px 0 #E5E7EB; }
+blockquote p { color: #111827; font-weight: 700; }
+ul, ol { background: #ffffff; border: 1px solid #111827; border-radius: 10px; box-shadow: 4px 4px 0 #E7F1EB; padding: 0.8em 1em 0.8em 1.85em; }
+li::marker { color: #059669; font-weight: 700; }
+/* 任务列表（`- [ ]`）：应用底座把任务列表的 padding-left 清成 0（无主题时让勾选框
+   贴正文左缘），会连卡片的内边距一起清掉 —— 勾选框直接怼在黑描边上（2026-10-06 用户
+   实测反馈）。编辑器与预览的任务列表类名不同（data-type / .mdTaskList），两边都要写。 */
+ul[data-type='taskList'], ul.mdTaskList { padding: 0.8em 1em; }
+/* 勾选框跟上卡片的描边语言：默认的浅灰描边在白卡上几乎看不见，勾选底色跟随应用色板
+   又会和薄荷强调色打架。黑描边圆角块 + 薄荷绿选中底，与 h2 的绿条同一支颜色。 */
+ul[data-type='taskList'] input[type='checkbox'], ul.mdTaskList input[type='checkbox'] { border-color: #111827; }
+ul[data-type='taskList'] input[type='checkbox']:checked, ul.mdTaskList input[type='checkbox']:checked { background-color: #059669; border-color: #111827; }
+p code, li code { color: #111827; background: #FDE68A; border: 1px solid #111827; border-radius: 3px; }
+/* 代码块：和 h1/h2 同一套硬阴影白卡 —— 白底 + 2px 黑描边 + 薄荷硬阴影。
+   `!important` 是必需的：writing.css 在浅色界面下用 `:root:not([data-theme='dark'])`
+   前缀（特异度 0,4,1）把所有主题的代码面钉成浅灰底，主题这里只有 2 个 class，压不过它。
+   不夺回来的后果不是「不够好看」，而是**整块看不见** —— 主题原本写在 pre code 上的浅色字
+   会落在浅灰底上（2026-09-29 实测，`#E5E7EB` on `#f3f5f7`）。
+   这里保持**浅底**而不是深色终端窗：应用在浅色模式下配的就是浅色 hljs 配色，浅底才对得上；
+   换成深底会得到「深绿 token 落在深底上」，得连整套 token 一起夺。 */
+pre { background: #ffffff !important; color: #111827 !important; border: 2px solid #111827 !important; border-radius: 8px; box-shadow: 5px 5px 0 #DCEAE2 !important; }
+pre code { color: inherit; }
+table { background: #ffffff; }
+table th { background: #059669; color: #ffffff; }
+table th, table td { border-color: #111827; }
+hr { border-top: 2px dashed #111827; }
+.pm-heading-1, .pm-heading-2, .pm-list-block, .pm-blockquote { margin-right: 6px; }
+.wechat-block-summaryCard { border: 1px solid #111827; background: #ffffff; box-shadow: 5px 5px 0 #DCEAE2; }
+.wechat-block-actionButton p { background: #059669; border-radius: 6px; box-shadow: 4px 4px 0 #111827; }
+
+/* 目录（正文里手写的 `[TOC]`）：一张薄荷硬阴影卡 —— 与这套主题的列表卡同一套语言，
+   但要把 `ol` 自己的卡片样式收掉，免得卡里再套一层卡。 */
+.pm-toc { margin: 0 0 1.2em; padding: 0.9em 1em 0.9em 1.1em; border: 1px solid #111827; border-radius: 10px; background: #ffffff; box-shadow: 4px 4px 0 #E7F1EB; }
+.pm-toc-title { margin: 0 0 0.5em; font-size: 12px; font-weight: 700; letter-spacing: 2px; color: #059669; }
+.pm-toc-list { list-style: decimal; margin: 0; padding-left: 1.6em; border: 0; background: transparent; box-shadow: none; }
+.pm-toc-item { font-size: 16px; line-height: 1.9; }
+.pm-toc-link { color: #111827; border-bottom: 0; font-weight: 700; }
+
+/* @dark */
+/*
+黑夜模式：卡片从「白卡 + 黑描边 + 硬阴影」翻成「深卡 + 浅描边 + 深硬阴影」，卡片的
+层叠感靠阴影保留。翠绿与荧光黄这两支强调色本来就在暗底上好看，只把荧光笔的底色压
+暗一档，免得黄块在白字下面跳出来。
+只进编辑器；公众号导出永远用上面的白纸版。
+*/
+:root { color: #E5E7EB; background-color: #12161B; }
+
+h1 { color: #F9FAFB; background: #1B2129; border-color: #E5E7EB; box-shadow: 6px 6px 0 #064E3B; }
+
+h2 { color: #F9FAFB; background: #1B2129; border-color: #E5E7EB; border-left-color: #34D399; box-shadow: 4px 4px 0 #064E3B; }
+
+h3 { color: #F9FAFB; border-bottom-color: #FDE68A; }
+
+p { color: #CBD5E1; }
+
+strong { color: #F9FAFB; }
+a { color: #34D399; border-bottom-color: #34D399; }
+
+mark { color: #A7F3D0; background: #064E3B; }
+img { box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4); background: #1B2129; }
+
+blockquote { background: #1B2129; border-color: #6B7280; box-shadow: 4px 4px 0 #26303B; }
+blockquote p { color: #F9FAFB; }
+
+ul, ol { background: #1B2129; border-color: #E5E7EB; box-shadow: 4px 4px 0 #064E3B; }
+li::marker { color: #34D399; }
+
+/* 深色下的勾选框：浅描边换灰、底色跟深卡，选中仍是薄荷绿。 */
+ul[data-type='taskList'] input[type='checkbox'], ul.mdTaskList input[type='checkbox'] { border-color: #6B7280; background-color: #1B2129; }
+ul[data-type='taskList'] input[type='checkbox']:checked, ul.mdTaskList input[type='checkbox']:checked { background-color: #059669; border-color: #059669; }
+
+/* 荧光黄芯片是这套主题的识别点，暗底上照样保留 —— 底色和字色都得显式写回来，
+   否则会被深色底座的 `p code` 规则换成深灰芯片。 */
+p code, li code { color: #111827; background: #FDE68A; border-color: #111827; }
+
+/* 深色段的代码块也要带 !important：浅色段那四条是 important 的，不带的话即使处在
+   黑夜模式也会被浅色段的白底黑字压住（important 之间才比顺序）。 */
+pre { background: #0B0F14 !important; color: #E5E7EB !important; border-color: #6B7280 !important; box-shadow: 5px 5px 0 #064E3B !important; }
+
+table { background: #1B2129; }
+table th { background: #059669; color: #FFFFFF; }
+table th, table td { border-color: #6B7280; }
+
+hr { border-top-color: #6B7280; }
+
+.wechat-block-summaryCard { border-color: #6B7280; background: #1B2129; box-shadow: 5px 5px 0 #064E3B; }
+.wechat-block-actionButton p { background: #059669; box-shadow: 4px 4px 0 #E5E7EB; }
+
+.pm-toc { border-color: #E5E7EB; background: #1B2129; box-shadow: 4px 4px 0 #064E3B; }
+.pm-toc-title { color: #34D399; }
+/* 深色段的 `ul, ol` 又把卡片样式写回来了，这里必须再收一次。 */
+.pm-toc-list { border: 0; background: transparent; box-shadow: none; }
+.pm-toc-link { color: #F9FAFB; }

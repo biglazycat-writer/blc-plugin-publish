@@ -1,0 +1,144 @@
+/*
+@name GitHub 风
+@description 照 github-markdown-css 的观感：系统无衬线 + 600 字重标题 + 蓝色链接 + 浅灰代码面
+@tags GitHub,Markdown,技术文档,简约
+@accent #0969da
+@accentSecondary #1f883d
+*/
+/* ⚠️ 字号一律写**绝对 px**，不要用 `em` / `rem`：
+   - `em` 会落到应用纸张的字号（`--editor-font-size`，默认 18px），而 GitHub 每一级都是相对
+     **16px 正文**算的 —— 用 em 会让代码块、表格、引用整体偏大 12%。
+   - `rem` 会落到应用根字号，而它是 **14px**（不是 16px），同样对不上。
+   下面的 px 值就是 GitHub 那套 em（16px 正文基准）换算并缩放后的绝对值。
+
+   ⚠️ 而且**一律取整数**：工具栏那个字号框读的是 `getComputedStyle`，`12.8px` 会原样显示成
+   「12.8」—— 用户看到的就是「字号怎么会有小数点」。取整的偏移不超过半像素，肉眼看不出来。
+
+   **整套按 ~0.9 缩了一档**（2026-09-29，用户反馈）：GitHub 的原始刻度（正文 16 / h1 32 /
+   代码块 13.6）是给它自己 ~1012px 的正文栏调的；大懒猫默认纸张是 A4（794px，正文栏只有
+   650px），原样搬过来头重脚轻。缩放后：正文 15px、代码块 13px（GitHub 是正文的 85%，
+   13 / 15 ≈ 87%，取整带来的偏差）。标题阶梯在 2026-10-08 改成全应用统一口径
+   （h1 26px，见下面那组规则），不再沿用 GitHub 的 2.0 倍。观感（标题底边线、蓝链接
+   无下划线、灰代码面、引用灰条）与配色仍照 GitHub。
+   想回到 GitHub 原始刻度就把正文改回 16px、h1 32 / h2 24 / h3 20 / 代码块 13.6px。
+
+   正文口径对齐 github-markdown-css：系统无衬线、1.5 行距、不加字距、按词换行。
+   底座（BASE_THEME_CSS）是中文阅读口径（1.9 行距、0.5px 字距、break-all），这里全部按 GitHub 的来。 */
+:root { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, "PingFang SC", "Microsoft YaHei", sans-serif; color: #1f2328; background: #ffffff; line-height: 1.5; letter-spacing: 0; word-break: normal; }
+
+/* 标题：600 字重、左对齐；h1/h2 带一条 1px 分隔线（GitHub 的标志性做法）。
+   阶梯按**全应用统一口径**（h1 1.75 / h2 1.40 / h3 1.20 / h4 1.07 / h5 0.93 /
+   h6 0.87 × 正文），不再照搬 GitHub 自己的 2.0 倍 —— 各主题标题跨度差 0.35 倍
+   正是用户报的「换主题像换了一套排版」。字号仍是正文 15px 的整数倍。 */
+h1 { color: #1f2328; font-size: 26px; font-weight: 700; line-height: 1.25; letter-spacing: 0; text-align: left; border-bottom: 1px solid #d1d9e0; padding-bottom: 0.3em; }
+h2 { color: #1f2328; font-size: 21px; font-weight: 700; line-height: 1.25; letter-spacing: 0; text-align: left; border-bottom: 1px solid #d1d9e0; padding-bottom: 0.3em; }
+h3 { color: #1f2328; font-size: 18px; font-weight: 700; line-height: 1.25; letter-spacing: 0; text-align: left; }
+h4 { color: #1f2328; font-size: 16px; font-weight: 700; line-height: 1.25; letter-spacing: 0; text-align: left; }
+h5 { color: #1f2328; font-size: 14px; font-weight: 700; line-height: 1.25; letter-spacing: 0; text-align: left; }
+h6 { color: #59636e; font-size: 13px; font-weight: 700; line-height: 1.25; letter-spacing: 0; text-align: left; }
+
+p { color: #1f2328; font-size: 15px; line-height: 1.5; letter-spacing: 0; text-align: left; word-break: normal; overflow-wrap: break-word; }
+/* 加粗只动字重，取 700：GitHub 用的是 600，但 600 在中文字体（微软雅黑只有
+   400/700、苹方最重到 600）上会被静默取整，同一套主题在 Windows / macOS 上是两种
+   观感。700 是唯一两端都可靠的一档。 */
+strong { color: #1f2328; font-weight: 700; letter-spacing: 0; }
+
+/* 链接：GitHub 正文里的链接默认不带下划线，靠颜色区分。 */
+a { color: #0969da; border-bottom: none; text-decoration: none; }
+/* 高亮（`==…==`）：GitHub 用来标重点的那支浅黄（它高亮代码行也是这个色）。 */
+mark { color: #1f2328; background: #fff8c5; border-radius: 3px; }
+
+/* 引用：只有左侧一条灰条，没有底色与圆角。字号写死，否则 `1em` 会落到纸张的 18px，
+   引用比正文还大。 */
+blockquote { color: #59636e; font-size: 15px; background: transparent; border-left: 3.75px solid #d1d9e0; border-radius: 0; padding: 0 1em; }
+blockquote p { color: #59636e; font-size: 15px; line-height: 1.5; }
+
+ul, ol { color: #1f2328; padding-left: 2em; line-height: 1.5; }
+li { font-size: 15px; line-height: 1.5; letter-spacing: 0; }
+
+/* 行内代码：半透明灰底 + 6px 圆角，字色跟正文，字号取正文的 85% 再取整（13px）。
+   带上 `td code` / `th code`：导出侧 `renderTableCellContent` 把单元格内容直接渲染成
+   行内 HTML，没有 `<p>` 包裹，只写 `p code` 的话表格里的行内代码在公众号里会掉样式。 */
+p code, li code, td code, th code { color: #1f2328; background: rgba(129, 139, 152, 0.12); border: 0; border-radius: 6px; padding: 0.2em 0.4em; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace; font-size: 13px; letter-spacing: 0; }
+
+/* 代码块：浅灰底、无描边、6px 圆角、16px 内边距 —— github-markdown-css 的原样。
+   `!important` 是必需的：writing.css 在浅色界面下用 `:root:not([data-theme='dark'])`
+   前缀（特异度 0,4,1）把代码面钉成 #f3f5f7，还加了一圈描边与柔和阴影；主题这里只有
+   2 个 class，压不过它 —— 那样编辑器与公众号导出会长得不一样。 */
+pre { background: #f6f8fa !important; color: #1f2328 !important; border: 0 !important; box-shadow: none !important; border-radius: 6px; padding: 16px; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace; font-size: 13px; line-height: 1.45; letter-spacing: 0; overflow-x: auto; }
+pre code { color: inherit; background: none; border: 0; border-radius: 0; padding: 0; font-size: 100%; font-family: inherit; white-space: pre; }
+
+/* 表格：1px 灰边 + 表头浅灰，字号与正文一致。GitHub 的隔行底色靠 `tr:nth-child(2n)`，
+   那个选择器 juice 内联不出去（导出侧会失效），所以这里用表头底色替代，保证两边一致。 */
+table { background: #ffffff; border-collapse: collapse; font-size: 15px; line-height: 1.5; }
+table th, table td { border: 1px solid #d1d9e0; padding: 6px 13px; }
+table th { background: #f6f8fa; color: #1f2328; font-weight: 700; }
+
+hr { border: 0; height: 3.75px; background: #d1d9e0; }
+img { border: 1px solid #d1d9e0; border-radius: 6px; background: #ffffff; }
+
+/* 块间距跟着同一比例缩（GitHub 是 16 / 24px）。底座的 `.pm-block { margin: 0.58em 0 }`
+   特异度更高（0,3,0），所以间距必须写在这些 pm-* 类上，光写 `p` 是压不过的。
+   `.pm-first-block` 放最后：文档首块不要顶部留白。 */
+.pm-block { margin: 0 0 15px; }
+.pm-heading-1, .pm-heading-2, .pm-heading-3, .pm-heading-4, .pm-heading-5, .pm-heading-6 { margin-top: 22.5px; margin-bottom: 15px; }
+.pm-first-block { margin-top: 0; }
+
+/* 目录（正文里手写的 `[TOC]`）：照 GitHub 的目录观感 —— 不画卡片，小标题带一条下边线，
+   条目就是普通链接。 */
+.pm-toc { margin: 0 0 16px; padding: 0; border: 0; background: transparent; }
+.pm-toc-title {
+  margin: 0 0 8px;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: 0;
+  color: #1f2328;
+  border-bottom: 1px solid #d1d9e0;
+  padding-bottom: 0.3em;
+}
+.pm-toc-list { list-style: none; margin: 0; padding-left: 0; }
+.pm-toc-item { font-size: 15px; line-height: 1.5; }
+.pm-toc-link { color: #0969da; border-bottom: 0; }
+
+/* @dark */
+/*
+黑夜模式：照 github-markdown-css 的 dark 口径换一套色 —— 墨底 #0d1117、正文 #f0f6fc、
+分隔线与描边 #3d444d、代码面 #151b23、链接 #4493f8、次级文字 #9198a1。
+只进编辑器；公众号导出永远用上面的白纸版。
+浅色段用了 `!important` 的地方（代码面）这里必须同样带 —— 两者都重要时按加载顺序决胜。
+*/
+:root { color: #f0f6fc; background-color: #0d1117; }
+
+h1 { color: #f0f6fc; border-bottom-color: #3d444d; }
+h2 { color: #f0f6fc; border-bottom-color: #3d444d; }
+h3 { color: #f0f6fc; }
+h4 { color: #f0f6fc; }
+h5 { color: #f0f6fc; }
+h6 { color: #9198a1; }
+
+p { color: #f0f6fc; }
+strong { color: #f0f6fc; }
+a { color: #4493f8; }
+mark { color: #f0f6fc; background: rgba(187, 128, 9, 0.32); }
+img { border-color: #3d444d; background: #0d1117; }
+
+blockquote { color: #9198a1; border-left-color: #3d444d; background: transparent; }
+blockquote p { color: #9198a1; }
+
+ul, ol { color: #f0f6fc; }
+
+p code, li code, td code, th code { color: #f0f6fc; background: rgba(110, 118, 129, 0.4); }
+
+pre { background: #151b23 !important; color: #f0f6fc !important; border: 0 !important; box-shadow: none !important; }
+pre code { color: inherit; }
+
+table { background: #0d1117; }
+table th, table td { border-color: #3d444d; }
+table th { background: #151b23; color: #f0f6fc; }
+
+hr { background: #3d444d; }
+img { background: #0d1117; }
+
+.pm-toc-title { color: #f0f6fc; border-bottom-color: #3d444d; }
+.pm-toc-link { color: #4493f8; }

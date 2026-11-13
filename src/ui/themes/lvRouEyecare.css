@@ -1,0 +1,311 @@
+/*
+@name 绿柔护眼
+@description 暖米白纸配柔绿点缀，照 HBuilderX「绿柔」配色复刻，为中文长篇阅读调的低刺激版面
+@tags 护眼,米白,长篇,中文
+@accent #41A863
+@accentSecondary #BCD68D
+@bg #FFFAE8
+
+设计口径（改这套主题前先读）：
+
+ 0. **纸色是暖米白 #FFFAE8，不是绿纸。** 这是本主题 2026-10-08 重做时纠正的第一件事：
+    HBuilderX「绿柔」的真实底色是暖米白（VS Code 移植版 `editor.background = #fffae8`、
+    思源移植版 `--b3-theme-background = rgb(255,250,233)`、HBuilderX 官方文档里也写作
+    `#faf6e6`），**「绿」指的是点缀色而不是纸色**。旧版把整个版面刷成 #C7EDCC 豆沙绿，
+    标题、引用卡、表格、代码块、目录全是绿的，正文还用了带绿味的墨 —— 一片绿糊在一起，
+    层级全靠明度差，看上去就是「被荧光笔涂过一遍」。现在的分工是：
+    纸（米白）→ 卡片（更亮的白）→ 代码面（更深的暖沙）三层用**明度**分层，
+    绿只出现在**该被看见的地方**（标题、列表符、引用左竖线、表头、勾选框）。
+
+ 1. 绿有三档，各有各的活，别混用：
+      `#41A863` 描边/列表符（HBuilderX 的 focusBorder、tab 高亮色）
+      `#79BB8A` 细线/软填充（思源移植版的 --b3-theme-primary）
+      `#BCD68D` 色块填充（HBuilderX 的 editor.selectionBackground）
+    文字用的绿一律比这三档更深（`#1F5C3A` / `#276B44` / `#2F7048`）—— 上面三档在米白纸上
+    对比度只有 2.2~2.9:1，当文字色读起来会发飘。
+
+ 2. 正文用**黑体**而不是宋体。米白纸上的长读要的是笔画均匀，宋体横细竖粗在这种中等亮度
+    的暖底上会发虚。标题反过来用宋体 —— 它只占一两行，要的是和正文拉开层级。
+
+ 3. 行高 2.0、字距 0.03em、首行缩进 2em：中文长篇的阅读节奏，三项一起才成立。
+    字距再往上加，中英混排里的英文会被逐字母拉开（letter-spacing 对拉丁同样生效）。
+    （只给行高不给缩进，段落边界会糊）。这三个值同时是**编辑器设置面板滑块的默认值**
+    （见 `readThemeRhythm`），改它们等于改编辑器的默认排版，`builtin-themes.test.ts`
+    里的 EXPECTED_RHYTHM 必须跟着改。
+
+ 4. 代码块**也是浅色**的，而且是暖沙面（`#F2ECD9`）而不是冷灰面。深色代码块在一张米白纸上
+    是一块硬反差，长读时每次扫过都要重新适应亮度 —— 这跟护眼的前提冲突。语法色取
+    HBuilderX 自己那一套（绿关键字 / 青字符串 / 紫数字 / 橙函数名），是这套主题「绿柔」
+    名号的另一半来源。
+
+ 5. 字号一律写**绝对 px**：`em` 会落到应用纸张的 `--editor-font-size`（18px）、`rem`
+    落到应用根字号（14px），都不是「正文的 1 倍」，还会算出小数被工具栏原样显示。
+*/
+
+:root {
+  color: #3E4B53;
+  background-color: #FFFAE8;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, "PingFang SC", "Microsoft YaHei", "Source Han Sans SC", "Noto Sans CJK SC", "Hiragino Sans GB", "WenQuanYi Micro Hei", sans-serif;
+  line-height: 2;
+  letter-spacing: 0.03em;
+}
+
+/* ── 标题：宋体，与黑体正文拉开层级。绿只给文字，横线交给沙色 ── */
+
+h1 {
+  color: #1F5C3A;
+  text-align: center;
+  font-family: "Noto Serif CJK SC", "Source Han Serif SC", Georgia, SimSun, serif;
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1.5;
+  letter-spacing: 0.08em;
+  margin: 1.1em 0 1.2em;
+  padding: 0 0 0.4em;
+  border-bottom: 3px double #D8CA9E;
+}
+
+h2 {
+  color: #276B44;
+  font-family: "Noto Serif CJK SC", "Source Han Serif SC", Georgia, SimSun, serif;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.6;
+  letter-spacing: 0.04em;
+  margin: 1.6em 0 0.75em;
+  padding: 0.1em 0 0.25em 0.6em;
+  border-left: 5px solid #41A863;
+  border-bottom: 1px solid #E8E3D0;
+}
+
+h3 {
+  color: #2F7048;
+  font-family: "Noto Serif CJK SC", "Source Han Serif SC", Georgia, SimSun, serif;
+  font-size: 21px;
+  font-weight: 700;
+  line-height: 1.7;
+  margin: 1.3em 0 0.6em;
+  padding-left: 0.5em;
+  border-left: 3px solid #79BB8A;
+}
+
+/* h4–h6：与所有主题共用同一条标题阶梯（19 / 16 / 15px）。这套主题的正文字号是 17px，
+   所以不能靠底座那套 16px 正文版的兜底（会算出 0.82 倍，六级标题又比正文小）。 */
+h4, h5, h6 {
+  color: #3E4B53;
+  font-family: "Noto Serif CJK SC", "Source Han Serif SC", Georgia, SimSun, serif;
+  font-weight: 700;
+  margin: 1.1em 0 0.5em;
+}
+h4 { font-size: 19px; }
+h5 { font-size: 16px; }
+h6 { font-size: 15px; }
+
+/* ── 正文：阅读节奏的主体 ── */
+
+p {
+  color: #3E4B53;
+  font-size: 17px;
+  line-height: 2;
+  letter-spacing: 0.03em;
+  text-align: justify;
+  text-justify: inter-ideograph;
+  text-indent: 2em;
+  margin-bottom: 0.9em;
+  word-break: normal;
+  overflow-wrap: break-word;
+}
+
+/* 首行缩进只给散文段落。元信息块（编写日期 / 适用项目，段内靠换行分条）吃到缩进会变成
+   「整块只有第一行缩进」的怪样子。编辑器里类名挂在 p 自己身上，导出侧挂在包住它的
+   section 上，所以两种写法都要有。 */
+p.pm-line-block, .pm-line-block p { text-indent: 0; }
+li p { text-indent: 0; }
+blockquote p { text-indent: 0; }
+td p, th p { text-indent: 0; text-align: left; }
+
+/* 导语段：不缩进、略大一号，当作一篇文章的入口。 */
+.pm-lead-paragraph {
+  color: #1F5C3A;
+  font-size: 18px;
+  text-indent: 0;
+}
+
+strong { color: #1F5C3A; font-weight: 700; }
+/* 中文没有真斜体，`font-style: italic` 会让浏览器把字形强行倾斜（笔画发糊）。
+   这套主题的 em 靠**颜色**区分，保持直立。 */
+em { color: #586E75; font-style: normal; }
+del { color: #9F9371; text-decoration: line-through; }
+a { color: #0E70C0; border-bottom: 1px solid #0E70C0; text-decoration: none; }
+mark { color: #2F4A16; background: #BCD68D; border-radius: 3px; padding: 0 0.15em; }
+
+/* ── 引用：比纸面更亮的白卡 + 一道柔绿左竖线（HBuilderX 的引述块口径） ── */
+
+blockquote {
+  color: #586E75;
+  background: #FFFDF5;
+  border: 1px solid #E8E3D0;
+  border-left: 4px solid #79BB8A;
+  border-radius: 0 6px 6px 0;
+  padding: 0.75em 1em;
+  margin: 1.1em 0;
+}
+blockquote p { color: #586E75; font-size: 16px; line-height: 1.9; margin-bottom: 0.35em; }
+
+/* ── 列表：无序用绿点、有序用琥珀序号，两种记号不抢同一个色 ── */
+
+ul, ol { color: #3E4B53; padding-left: 2em; line-height: 2; margin: 0.8em 0; }
+li { color: #3E4B53; font-size: 17px; letter-spacing: 0.03em; margin-bottom: 0.3em; }
+ol li::marker { color: #B58900; font-weight: 700; }
+ul li::marker { color: #41A863; }
+
+input[type="checkbox"] { accent-color: #41A863; }
+ul[data-type="taskList"] > li > label input[type="checkbox"] { border: 1px solid #79BB8A; border-radius: 3px; }
+li[data-checked="true"] { color: #9F9371; text-decoration: line-through; text-decoration-color: #79BB8A; }
+
+/* ── 代码：暖沙面 + 中性墨字，不在米白纸上开一块冷灰或硬反差 ── */
+
+p code, li code, td code, th code {
+  color: #3A5320;
+  background: #EAEFCC;
+  border: 1px solid #CFD9A0;
+  border-radius: 3px;
+  padding: 0.1em 0.35em;
+  font-family: "Fira Code", Consolas, Monaco, "Courier New", monospace;
+  font-size: 16px;
+  letter-spacing: 0;
+}
+
+/* `!important`：writing.css 用 `:root:not([data-theme='dark']) … pre`（特异度 0,4,1）
+   把所有主题的代码面钉成浅灰底，主题的 `pre` 收进作用域只有 0,2,1，压不过它。 */
+pre {
+  color: #3E4B53 !important;
+  background: #F2ECD9 !important;
+  border: 1px solid #DFD3AE !important;
+  border-radius: 6px;
+  padding: 0.9em 1em;
+  font-family: "Fira Code", Consolas, Monaco, "Courier New", monospace;
+  font-size: 14px;
+  line-height: 1.75;
+}
+pre code { color: inherit; background: none; border: 0; padding: 0; font-family: inherit; }
+
+/* 暖沙代码面上的语法色：整张色板取自 HBuilderX「绿柔」的 tokenColors，只是把几档在
+   米白底上偏飘的（#DB7800 橙、#2AA198 青）压深到 4:1 以上。色相全部保留。
+   深色模式不用重写 —— DARK_BASE_THEME_CSS 会统一换成暗底配色。 */
+.hljs-keyword { color: #577909; font-weight: 700; }
+.hljs-string { color: #1A7A70; }
+.hljs-number { color: #8A2FC7; }
+.hljs-comment { color: #7B8990; font-style: italic; }
+.hljs-function { color: #A85200; }
+.hljs-title { color: #A85200; }
+.hljs-built_in { color: #6C65B0; }
+.hljs-attr { color: #934B3C; }
+.hljs-type { color: #6C65B0; }
+.hljs-tag { color: #2369B6; }
+.hljs-name { color: #2369B6; }
+.hljs-selector-tag { color: #577909; }
+.hljs-selector-class { color: #8A5A00; }
+.hljs-literal { color: #8A2FC7; }
+.hljs-params { color: #3E4B53; }
+.hljs-meta { color: #7B8990; }
+
+/* ── 表格：白身 + 柔绿表头，绿只出现在第一行 ── */
+
+table {
+  width: 100%;
+  box-sizing: border-box;
+  border-collapse: collapse;
+  color: #3E4B53;
+  background: #FFFDF5;
+  border: 1px solid #D8CA9E;
+  margin: 1.1em 0;
+  font-size: 15px;
+}
+table th, table td { color: #3E4B53; border: 1px solid #E8E3D0; padding: 0.55em 0.8em; }
+table th { color: #276B44; background: #E0EDD3; font-weight: 700; }
+table tr:nth-child(2n) td { background: #F7F2E4; }
+
+img { display: block; max-width: 100%; margin: 1em auto; border-radius: 6px; }
+hr { border: none; border-top: 1px solid #E8E3D0; margin: 1.8em 0; }
+
+/* ── 顶层块的间距（编辑器与导出共用的类名） ── */
+
+.pm-block { margin: 0 0 0.9em; }
+.pm-heading-1 { margin-top: 1.1em; margin-bottom: 1.2em; }
+.pm-heading-2 { margin-top: 1.6em; margin-bottom: 0.75em; }
+.pm-heading-3 { margin-top: 1.3em; margin-bottom: 0.6em; }
+.pm-heading-4, .pm-heading-5, .pm-heading-6 { margin-top: 1.1em; margin-bottom: 0.5em; }
+.pm-first-block { margin-top: 0; }
+.pm-blockquote { background: #FFFDF5; border: 1px solid #E8E3D0; border-left: 4px solid #79BB8A; border-radius: 0 6px 6px 0; }
+
+.wechat-block-summaryCard { border: 1px solid #E8E3D0; background: #FFFDF5; }
+.wechat-block-quoteCard blockquote { background: #FFFDF5; }
+/* 按钮反白用 HBuilderX 自己的口径：亮绿底 + 近黑字（`button.foreground = #102115`），
+   不是白字 —— 白字压在 #1CA035 上只有 3.4:1。 */
+.wechat-block-actionButton p { color: #102115; background: #1CA035; border-radius: 4px; text-indent: 0; text-align: center; }
+.wechat-block-qrCode { border: 1px dashed #79BB8A; background: #FFFDF5; }
+.wechat-block-followCta { border-top: 1px solid #E8E3D0; }
+
+/* 目录（正文里手写的 `[TOC]`）：一张比纸面更亮的白卡，顶上压一道柔绿横杠当「目录」标签，
+   不做双线框 —— 双线框在米白纸上会和标题的沙色双线打架。 */
+.pm-toc { margin: 0 0 1.8em; padding: 1.1em 1.3em 1em; background: #FFFDF5; border: 1px solid #E8E3D0; border-top: 4px solid #79BB8A; border-radius: 0 0 6px 6px; }
+.pm-toc-title { color: #276B44; text-align: center; font-family: "Noto Serif CJK SC", "Source Han Serif SC", Georgia, SimSun, serif; font-size: 16px; font-weight: 700; letter-spacing: 0.5em; margin: 0 0 0.7em; text-indent: 0.5em; }
+.pm-toc-list { list-style: decimal; margin: 0; padding-left: 2em; }
+.pm-toc-list li::marker { color: #41A863; }
+.pm-toc-item { color: #3E4B53; font-size: 16px; line-height: 2; }
+.pm-toc-link { color: #3E4B53; border-bottom: 0; text-decoration: none; }
+
+/* @dark */
+
+/* 夜间绿柔：纸色压到深橄榄墨（HBuilderX Soft Green Dark 的 #1E2419），正文用带绿味的浅灰
+   而不是纯白 —— 纯白在暗底上是另一种刺眼。层级关系与浅色版保持一致（标题最亮、引用抬一层、
+   代码面再暗一层），绿色比浅色版提亮两档（暗底上 #41A863 那一族会糊掉）。 */
+:root { color: #D4D9D2; background-color: #1E2419; }
+
+h1 { color: #8FE0A8; border-bottom-color: #3D4A35; }
+h2 { color: #6ECF8F; border-left-color: #4ADE80; border-bottom-color: #333D2B; }
+h3 { color: #55C077; border-left-color: #4ADE80; }
+h4, h5, h6 { color: #D4D9D2; }
+
+p { color: #D4D9D2; }
+.pm-lead-paragraph { color: #8FE0A8; }
+
+strong { color: #8FE0A8; }
+em { color: #A8B5A0; }
+del { color: #6B7280; }
+a { color: #60A5FA; border-bottom-color: #60A5FA; }
+mark { color: #DCEFD8; background: #33512E; }
+
+blockquote { color: #A8B5A0; background: #262C20; border-color: #333D2B; border-left-color: #4ADE80; }
+blockquote p { color: #A8B5A0; }
+
+ul, ol { color: #D4D9D2; }
+li { color: #D4D9D2; }
+ol li::marker { color: #E0A82E; }
+ul li::marker { color: #4ADE80; }
+ul[data-type="taskList"] > li > label input[type="checkbox"] { border-color: #46543A; }
+li[data-checked="true"] { color: #6B7280; text-decoration-color: #4ADE80; }
+
+p code, li code, td code, th code { color: #CFE8B4; background: #2E3A22; border-color: #46543A; }
+pre { color: #D4D9D2 !important; background: #161B11 !important; border-color: #333D2B !important; }
+
+table { color: #D4D9D2; background: #262C20; border-color: #3D4A35; }
+table th, table td { color: #D4D9D2; border-color: #333D2B; }
+table th { color: #8FE0A8; background: #26301C; }
+table tr:nth-child(2n) td { background: #22281B; }
+
+hr { border-top-color: #333D2B; }
+
+.pm-blockquote { background: #262C20; border-color: #333D2B; border-left-color: #4ADE80; }
+.wechat-block-summaryCard { border-color: #333D2B; background: #262C20; }
+.wechat-block-quoteCard blockquote { background: #262C20; }
+.wechat-block-actionButton p { color: #102115; background: #4ADE80; }
+.wechat-block-qrCode { border-color: #46543A; background: #262C20; }
+.wechat-block-followCta { border-top-color: #333D2B; }
+
+.pm-toc { background: #262C20; border-color: #333D2B; border-top-color: #4ADE80; }
+.pm-toc-title { color: #8FE0A8; }
+.pm-toc-list li::marker { color: #4ADE80; }
+.pm-toc-item { color: #D4D9D2; }
+.pm-toc-link { color: #D4D9D2; }
