@@ -4,13 +4,14 @@
 
 [大懒猫创作平台](https://github.com/biglazycat-writer) 的官方 API 版公众号发布插件。把编辑器里的文章排版成符合微信公众号要求的 HTML，处理正文图片与封面，通过公众号官方接口创建**草稿**；最终发表仍由作者在公众号后台人工确认，插件不群发、不公开发表。
 
-本仓库是一个**独立的 npm 工程**：SDK 通过 npm 安装，排版代码、主题和测试由本工程独立维护，不引用、不软链接、不依赖桌面端源码。
+本仓库是一个**独立的 npm 工程**：SDK 从随仓库携带的固定 tgz 安装，排版代码、主题和测试由本工程独立维护，不引用、不软链接、不依赖桌面端源码。
 
 | 项目 | 值 |
 | --- | --- |
 | 插件 ID / 包名 | `blc-plugin-publish` |
-| 版本 | `0.1.0` |
-| 插件 API | `biglazycat.apiVersion = 1`、`minimumApiRevision = 1` |
+| 版本 | `0.2.0` |
+| 插件 API | `biglazycat.apiVersion = 1`、`minimumApiRevision = 2` |
+| SDK | `vendor/blc-plugin-sdk-1.2.0.tgz`（已验证的待发布工件） |
 | 运行环境 | Node `>=22.23.3 <23.0.0`（宿主提供，安装包不内嵌 Node） |
 | 支持平台 | Windows amd64/arm64、macOS amd64/arm64、Linux amd64/arm64 |
 | UI 技术 | React 19 + TypeScript + Vite 7 + Vitest |
@@ -23,7 +24,7 @@
 
 - 在「账号设置」页填写 AppID / AppSecret，可配置不含账号密码的 HTTP(S) 代理。
 - 「测试连接」验证凭据并缓存 `access_token`（提前 300 秒过期，并发请求共用一次取 token）。
-- 「检测 IP」从微信 `40164` 错误中解析出口 IP，提示加入公众号 IP 白名单；带代理时标记出口来源。
+- 「检查微信 IP 白名单」检查微信是否接受当前连接；遇到 `40164` 时解析出口 IP 并提示加入白名单。检查成功时微信不一定返回 IP；带代理时标记出口来源。
 - 常用微信错误码（`40001` / `40013` / `40125` / `40164` / `45009` / `48001` 等）翻译成中文提示。
 
 **写作与排版**
@@ -93,14 +94,14 @@
 | `config.read` | 读取账号状态 | 否 | 否 |
 | `config.save` | 保存账号配置 | 否 | 否 |
 | `connection.test` | 测试连接 | 否 | 否 |
-| `connection.ip` | 检测出口 IP | 否 | 否 |
+| `connection.ip` | 检查微信 IP 白名单 | 否 | 否 |
 | `materials.list` | 读取封面素材 | 否 | 否 |
 | `draft.create` | 创建公众号草稿 | 否 | **是** |
 | `transfer.put` | 传输发布内容 | 否 | 否 |
 | `article.save` | 保存本地发布稿 | 否 | 否 |
 | `article.read` | 读取本地发布稿 | 否 | 否 |
 
-只有 `draft.create` 会真正写远端数据，且只创建草稿；`debug.status` 明确返回 `publicPublishing: false`。
+命令面板仅提供「发布当前文章」与「公众号账号设置」。除 `publish.open` 外，其余命令均为内部调用，由插件页面提供操作与结果；`debug.status` 仍允许 AI 调用。只有 `draft.create` 会真正写远端数据，且只创建草稿；`debug.status` 明确返回 `publicPublishing: false`。
 
 ---
 
@@ -110,16 +111,16 @@
 
 1. 启动大懒猫创作平台，在插件页安装并启用本插件。
 2. 打开「公众号账号设置」，填写 AppID 和 AppSecret，按需填写代理地址。
-3. 点击「检测 IP」，把得到的出口 IP 加入微信开发者平台 → 公众号 → 开发 → 基本配置 → **IP 白名单**；公众号需已完成微信认证，否则草稿箱接口不可用。
+3. 点击「检查微信 IP 白名单」。若微信拒绝当前出口，将提示中的 IP 加入微信开发者平台 → 公众号 → 开发 → 基本配置 → **IP 白名单**；公众号需已完成微信认证，否则草稿箱接口不可用。
 4. 在编辑器执行「发布当前文章」（或工具栏按钮），选择主题、封面，预览后点「创建草稿」。
 5. 到公众号后台草稿箱预览确认，再手动发表。
 
 ### 方式二：从源码开发
 
-需要 Node >=22.23.3 <23.0.0 与大懒猫创作平台 API 1 修订 1。宿主按选定运行时的实际版本校验 engines；公众号插件的原生依赖仍须在目标系统验证。
+需要 Node >=22.23.3 <23.0.0 与大懒猫创作平台 API 1 修订 2。宿主按选定运行时的实际版本校验 engines；公众号插件的原生依赖仍须在目标系统验证。
 
 ```bash
-npm ci               # 从锁文件安装公开 SDK 1.1.0 与其余依赖
+npm ci               # 从锁文件安装本地 SDK 1.2.0 工件与其余依赖
 npm run typecheck    # 前后台两份 tsconfig 的严格类型检查
 npm run build        # tsc -p tsconfig.node.json && vite build
 npm test             # node --test tests/*.test.mjs && vitest run
@@ -127,7 +128,7 @@ npm test             # node --test tests/*.test.mjs && vitest run
 
 `npm run build` 生成 `dist/main.js`、`dist/publishing-store.js`、`dist/wechat.js` 与 `dist/ui/`；`dist/` 与 `node_modules/` 都不进版本库，`package-lock.json` 需要提交。
 
-> SDK 固定使用公开 npm 包 `blc-plugin-sdk@1.1.0`，首次安装需要访问 npm registry。宿主准备流程按 `package-lock.json` 执行 `npm ci`。
+SDK 固定使用 `vendor/blc-plugin-sdk-1.2.0.tgz`，完整工件随源码和安装包分发；其他依赖首次安装仍需访问 npm registry。宿主按 `package-lock.json` 自动准备依赖，已有完整 `dist` 时跳过类型检查和构建。
 
 ### 方式三：外部 AI / MCP 开发
 
@@ -164,7 +165,7 @@ npm test             # node --test tests/*.test.mjs && vitest run
 
 ## 约束与已知限制
 
-- 不提交构建产物和依赖：`dist/`、`node_modules/`、`coverage/` 均被忽略；SDK 固定为 `blc-plugin-sdk@1.1.0`，由 npm registry 和锁文件分发。
+- 不提交构建产物和依赖目录：`dist/`、`node_modules/`、`coverage/` 均被忽略；SDK 的固定 tgz 工件与锁文件需要提交。
 - 单次命令结果受 SDK 的 1 MiB 限制；大于此值的内容必须走 `transfer.put` 分段协议。
 - 需要公众号完成微信认证且出口 IP 在白名单内；网络不通时可通过代理地址排查。
 - 封面与正文图片走微信接口上传，受微信侧体积/格式与调用频次限制，超出会返回明确错误。
@@ -180,15 +181,15 @@ npm test             # node --test tests/*.test.mjs && vitest run
 发布步骤：
 
 1. 更新 `package.json` 的 `version`，在 `CHANGELOG.md` 里补对应段落，提交并推送到 `main`。
-2. 打标签并推送：`git tag -a v0.1.0 -m "blc-plugin-publish 0.1.0" && git push origin v0.1.0`。
+2. 打标签并推送：`git tag -a v0.2.0 -m "blc-plugin-publish 0.2.0" && git push origin v0.2.0`。
 3. 工作流自动执行 `npm ci` → `typecheck` → `build` → `test`，然后创建（或更新）GitHub Release，附上 `blc-plugin-publish-<version>.tgz` 与 `.sha256` 校验文件；Release notes 从 `CHANGELOG.md` 中该版本段落提取，末尾附提交对比链接。
 
 约束与说明：
 
-- 标签必须是 **`v` + `package.json` 版本**（例如版本 `0.1.0` 对应 `v0.1.0`），不一致时工作流直接报错退出。
+- 标签必须是 **`v` + `package.json` 版本**（例如版本 `0.2.0` 对应 `v0.2.0`），不一致时工作流直接报错退出。
 - 只做构建验证：Actions 页面手动运行 **Release** 工作流、`tag` 留空，会跑完整检查并把产物上传为 workflow artifact，不会创建 Release。
 - 产物是 `.tgz`，归档**顶层目录固定为 `package/`**（与 `npm pack` 一致）。桌面端解压时只剥离 `package/` 前缀，并要求 `package.json` 位于解压根目录；若用「包名-版本」作为顶层目录，安装会报找不到 `package.json`。
-- 产物包含 `dist/`、`package.json`、`package-lock.json` 与文档，**不含 `node_modules`**。在桌面端安装插件包时需勾选「准备依赖、类型检查并构建」，由宿主执行 `npm ci` 安装依赖；不勾选会安装成功但运行时缺少依赖。
+- 产物包含 `dist/`、`package.json`、`package-lock.json`、`vendor/` 中的 SDK 工件与文档，**不含 `node_modules`**。桌面端自动识别已有构建产物，只安装运行依赖，无需用户判断是否类型检查或构建。
 - 该工作流只使用仓库自带的 `GITHUB_TOKEN`，不需要额外配置 npm token 或其他 secret。
 
 ---
@@ -203,6 +204,12 @@ SDK 包 [blc-plugin-sdk](https://github.com/biglazycat-writer/blc-plugin-sdk) �
 
 ## SDK 与平台支持
 
-本工程固定使用 npm 包 `blc-plugin-sdk@1.1.0`。页面调用通过 `waitForTask` 有限等待；超时后查询现有任务，不自动重新提交有副作用的操作。
+本工程固定使用 SDK 1.2.0 tgz 工件。页面调用通过 `waitForTask` 有限等待；超时后查询现有任务，不自动重新提交有副作用的操作。
 
 构建目标为 ES2022 / Chromium 109 / Safari 16.4。当前更新在 Windows amd64 完成测试；平台声明与编译目标不代表所有系统 WebView、原生依赖均已完成实机验证。
+
+## 0.2.0 与宿主要求
+
+此版本需要大懒猫创作平台 API 1 修订 2。界面跟随宿主白天/黑夜模式，公众号排版与导出配色独立。命令面板仅显示“发布当前文章”和“公众号账号设置”；连接与 IP 白名单检查在账号设置页进行。
+
+发布页与设置页分开加载，预览计算在界面提交后执行，输入期间合并重复计算。宿主插件诊断提供容器、资源加载、桥接和 UI 就绪耗时。SDK 1.2.0 以 vendor 中的固定 tgz 工件随插件分发，因此构建和安装不依赖另一个源码目录或尚未发布的 npm 版本。

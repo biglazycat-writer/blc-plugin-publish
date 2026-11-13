@@ -7,67 +7,81 @@
           "id": "publish.open",
           "title": "发布当前文章",
           "aiCallable": true,
-          "externalEffect": false
+          "externalEffect": false,
+          "visibility": "public",
+          "contexts": [
+            "editor.document"
+          ]
         },
         {
           "id": "debug.status",
           "title": "检查插件状态",
           "aiCallable": true,
-          "externalEffect": false
+          "externalEffect": false,
+          "visibility": "internal"
         },
         {
           "id": "config.read",
           "title": "读取账号状态",
           "aiCallable": false,
-          "externalEffect": false
+          "externalEffect": false,
+          "visibility": "internal"
         },
         {
           "id": "config.save",
           "title": "保存账号配置",
           "aiCallable": false,
-          "externalEffect": false
+          "externalEffect": false,
+          "visibility": "internal"
         },
         {
           "id": "connection.test",
           "title": "测试连接",
           "aiCallable": false,
-          "externalEffect": false
+          "externalEffect": false,
+          "visibility": "internal"
         },
         {
           "id": "connection.ip",
-          "title": "检测出口 IP",
+          "title": "检查微信 IP 白名单",
           "aiCallable": false,
-          "externalEffect": false
+          "externalEffect": false,
+          "visibility": "internal"
         },
         {
           "id": "materials.list",
           "title": "读取封面素材",
           "aiCallable": false,
-          "externalEffect": false
+          "externalEffect": false,
+          "visibility": "internal"
         },
         {
           "id": "draft.create",
           "title": "创建公众号草稿",
           "aiCallable": false,
-          "externalEffect": true
+          "externalEffect": true,
+          "visibility": "internal"
         },
         {
           "id": "transfer.put",
           "title": "传输发布内容",
           "aiCallable": false,
-          "externalEffect": false
+          "externalEffect": false,
+          "visibility": "internal"
         },
         {
           "id": "article.save",
           "title": "保存本地发布稿",
           "aiCallable": false,
-          "externalEffect": false
+          "externalEffect": false,
+          "visibility": "internal"
         },
         {
           "id": "article.read",
           "title": "读取本地发布稿",
           "aiCallable": false,
-          "externalEffect": false
+          "externalEffect": false,
+          "visibility": "internal"
         }
       ],
       "menus": [
@@ -87,7 +101,8 @@
           "entry": "dist/ui/index.html",
           "defaultLocation": "tab",
           "route": "/publish",
-          "multiple": true
+          "multiple": true,
+          "commandPalette": false
         },
         {
           "id": "settings",
@@ -111,12 +126,12 @@
       "linux/arm64"
     ],
     "settingsView": "settings",
-    "minimumApiRevision": 1
+    "minimumApiRevision": 2
   },
   "dependencies": {
     "@tiptap/core": "3.32.1",
     "@tiptap/react": "3.32.1",
-    "blc-plugin-sdk": "1.1.0",
+    "blc-plugin-sdk": "file:vendor/blc-plugin-sdk-1.2.0.tgz",
     "highlight.js": "11.11.1",
     "i18next": "25.8.13",
     "juice": "11.1.1",
@@ -151,11 +166,12 @@
     "test": "node --test tests/*.test.mjs && vitest run"
   },
   "type": "module",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "大懒猫创作平台微信公众号发布插件",
   "files": [
     "dist",
     "README.md",
-    "README.en.md"
+    "README.en.md",
+    "vendor/blc-plugin-sdk-1.2.0.tgz"
   ]
 }

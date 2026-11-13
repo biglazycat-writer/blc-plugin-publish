@@ -4,21 +4,21 @@
 
 A plugin for [大懒猫创作平台](https://github.com/biglazycat-writer) that formats articles as WeChat-compatible HTML, processes body images and covers, and creates **drafts** through the official WeChat API. Final publication is confirmed manually in the WeChat account console. The plugin does not broadcast or publish articles publicly.
 
-This is an independent npm project. The SDK comes from npm; formatting code, themes and tests are maintained within this repository. It does not import or link desktop application source files.
+This is an independent npm project. The SDK comes from the verified tgz included in this repository; formatting code, themes and tests are maintained here. It does not import or link desktop application source files.
 
 | Item | Value |
 | --- | --- |
 | Plugin ID / package | `blc-plugin-publish` |
-| Plugin version | `0.1.0` |
-| Host API | `biglazycat.apiVersion = 1`, `minimumApiRevision = 1` |
-| SDK | `blc-plugin-sdk@1.1.0` |
+| Plugin version | `0.2.0` |
+| Host API | `biglazycat.apiVersion = 1`, `minimumApiRevision = 2` |
+| SDK | `vendor/blc-plugin-sdk-1.2.0.tgz` (verified candidate artifact) |
 | Runtime | Node `>=22.23.3 <23.0.0`, configured by the host |
 | Declared platforms | Windows, macOS and Linux; amd64/arm64 |
 | View stack | React 19, TypeScript, Vite 7 and Vitest |
 
 ## Features
 
-**Account and connectivity.** Configure AppID/AppSecret and an optional HTTP(S) proxy without embedded credentials. Connection tests verify credentials and cache `access_token`, refreshing 300 seconds early and sharing concurrent token requests. Egress-IP detection interprets WeChat's `40164` response to help configure the IP allowlist. Common WeChat API errors are mapped to readable messages.
+**Account and connectivity.** Configure AppID/AppSecret and an optional HTTP(S) proxy without embedded credentials. Connection tests verify credentials and cache `access_token`, refreshing 300 seconds early and sharing concurrent token requests. “Check WeChat IP allowlist” checks whether WeChat accepts the connection and extracts the egress IP from a `40164` rejection. A successful check may not return an IP. Common WeChat API errors are mapped to readable messages.
 
 **Writing and formatting.** Edit Markdown and preview WeChat-compatible HTML with ten bundled layout themes. The renderer supports code highlighting, KaTeX, Mermaid rendered before export, table column widths, captions, a table of contents and rich-text blocks. Export inlines styles and preserves text entities and image URLs while applying WeChat HTML constraints.
 
@@ -64,35 +64,35 @@ dist/                          Generated output; excluded from version control
 | `config.read` | Read account configuration status | No | No |
 | `config.save` | Save account configuration | No | No |
 | `connection.test` | Test connectivity and credentials | No | No |
-| `connection.ip` | Detect the egress IP | No | No |
+| `connection.ip` | Check WeChat IP allowlist | No | No |
 | `materials.list` | List cover materials | No | No |
 | `draft.create` | Create a WeChat draft | No | **Yes** |
 | `transfer.put` | Upload a payload chunk to the backend | No | No |
 | `article.save` | Save a local publishing draft | No | No |
 | `article.read` | Read a local publishing draft | No | No |
 
-Only `draft.create` writes remote content, and it creates a draft. `debug.status` explicitly returns `publicPublishing: false`.
+The command palette contains only publishing and account settings. All commands except `publish.open` are internal and used through plugin pages; `debug.status` remains AI-callable. Only `draft.create` writes remote content, and it creates a draft. `debug.status` explicitly returns `publicPublishing: false`.
 
 ## Install and use
 
 1. Start 大懒猫创作平台 and install/enable the plugin from its plugin page.
 2. Open the account settings view and enter AppID/AppSecret, plus a proxy if needed.
-3. Use egress-IP detection and add the address to the account's **IP allowlist** in the WeChat developer console. The account must meet WeChat's verification requirements for draft APIs.
+3. Run “Check WeChat IP allowlist”. If WeChat rejects the current egress IP, add the reported address to the account's **IP allowlist** in the WeChat developer console. The account must meet WeChat's verification requirements for draft APIs.
 4. Run “Publish current article” from the editor/menu, choose a theme and cover, preview the result and create a draft.
 5. Review the draft in the WeChat account console and publish it manually.
 
 ## Develop from source
 
-Use Node `>=22.23.3 <23.0.0`, npm `>=10.9.9 <11.0.0` and a host supporting API 1 revision 1. The host checks the actual selected Node against `engines.node`; native dependencies still need validation on each target system.
+Use Node `>=22.23.3 <23.0.0`, npm `>=10.9.9 <11.0.0` and a host supporting API 1 revision 2. The host checks the actual selected Node against `engines.node`; native dependencies still need validation on each target system.
 
 ```bash
-npm ci                 # Install published SDK 1.1.0 and the locked dependencies
+npm ci                 # Install the local SDK 1.2.0 artifact and locked dependencies
 npm run typecheck      # Check browser and backend TypeScript
 npm run build          # Compile the backend and bundle the view
 npm test               # Backend integration tests and Vitest UI tests
 ```
 
-Tests use built backend output, so build before testing. Exclude `dist/`, `node_modules/` and coverage from commits; commit `package-lock.json`. The SDK is installed from npm, without a vendor copy or cross-project source dependency. Initial installation requires registry access. The host's preparation flow also uses `npm ci`.
+Tests use built backend output, so build before testing. Exclude `dist/`, `node_modules/` and coverage from commits; commit `package-lock.json` and the SDK tgz in `vendor/`. Other dependencies require registry access for initial installation. The host prepares dependencies automatically and skips type checking/building when complete `dist` output already exists.
 
 ### External coding tools and MCP
 
@@ -134,3 +134,7 @@ WeChat API tests use a local HTTP mock server. They do not contact real accounts
 See [CONTRIBUTING.md](CONTRIBUTING.md) and [CHANGELOG.md](CHANGELOG.md), currently in Chinese. Keep both README versions aligned when behavior changes.
 
 The [SDK](https://github.com/biglazycat-writer/blc-plugin-sdk) is MIT licensed. Licensing for the rest of this repository has not been specified by its maintainer; do not assume the entire project uses the SDK's license.
+
+## 0.2.0 host requirements
+
+Requires host API 1 revision 2. The UI follows the resolved host light/dark mode; exported article styling remains independent. Only publishing and account settings appear in the command palette. The verified SDK 1.2.0 tarball is included in vendor for independent builds and installation.

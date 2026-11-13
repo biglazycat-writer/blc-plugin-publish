@@ -1,3 +1,4 @@
+import { useScheduledValue } from '../../../lib/use-scheduled-value'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
@@ -484,10 +485,11 @@ export function WeChatPublishModal(props: Props) {
   }, [articleText,publishTitle,authorName,coverImage,coverMediaID,coverMode,openComment,onlyFansCanComment,digest,styleOverrides])
 
   // The source pane is the single editing surface for this publishing mode.
-  const doc = useMemo<JSONContent | null>(() => {
+  const parsed = useScheduledValue<JSONContent | null>(() => {
     if (!open) return null
     return docFromMarkdown(articleText || '') as JSONContent
-  }, [open, articleText])
+  }, [open, articleText], null)
+  const doc = parsed.value
 
   const imageSrcs = useMemo(() => collectImageSrcs(doc), [doc])
 
@@ -501,7 +503,7 @@ export function WeChatPublishModal(props: Props) {
     void (async () => {
       const rendered = await collectMermaidPngsFromJson(doc as never)
       if (!cancelled) setMermaidPngs(rendered)
-    })()
+    })().catch(error => { if (!cancelled) setError(String(error)) })
     return () => {
       cancelled = true
     }
@@ -590,29 +592,24 @@ export function WeChatPublishModal(props: Props) {
     [docForExport, isLayout, theme, themeId, publishTitle, styleOverrides, mermaidPngs],
   )
 
-  // The plan drives the structure summary chips.
-  const plan = useMemo(() => {
-    if (!open || !doc || !isLayout) return null
-    return buildLayoutHtml(doc as Record<string, unknown>, {
-      themeId,
-      title: publishTitle,
-      styleOverrides,
-      mermaidPngs,
-    }).plan
-  }, [open, doc, isLayout, themeId, publishTitle, styleOverrides, mermaidPngs])
-
-  const summary = useMemo(() => (plan ? planSummary(plan) : null), [plan])
-
-  const html = useMemo(() => {
-    if (!open) return ''
-    return buildHtml((src) => imageData[src] || mermaidImageData[src] || src)
-  }, [open, buildHtml, imageData, mermaidImageData])
+  const rendered = useScheduledValue(() => {
+    if (!open || !docForExport || !theme) return { html: '', summary: null };
+    const resolveImage = (src: string) => imageData[src] || mermaidImageData[src] || src;
+    if (isLayout) {
+      const result = buildLayoutHtml(docForExport as Record<string, unknown>, { themeId, title: publishTitle, styleOverrides, mermaidPngs, resolveImage });
+      return { html: result.html, summary: planSummary(result.plan) };
+    }
+    return { html: buildHtml(resolveImage), summary: null };
+  }, [open, docForExport, theme, isLayout, themeId, publishTitle, styleOverrides, mermaidPngs, imageData, mermaidImageData, buildHtml], { html: '', summary: null });
+  const { html, summary } = rendered.value;
+  const previewPending = parsed.pending || rendered.pending;
 
   const previewDoc = useMemo(() => previewShell(html), [html])
 
   if (!open) return null
 
   const handleCopy = async () => {
+    if (previewPending || parsed.error || rendered.error) return;
     setError('')
     setStatus('')
     try {
@@ -625,6 +622,7 @@ export function WeChatPublishModal(props: Props) {
 
   const handlePublishToWeChat = async () => {
     if (publishing) return
+    if (previewPending || parsed.error || rendered.error) { setError('请等待预览生成完成'); return }
     if (!html.trim()) { setError(t('wechatPublish.noContent')); return }
     if (!publishTitle.trim()) { setError(t('wechatPublish.titleRequired')); return }
     // Narrowed once here so the draft payload below doesn't repeat the guard.
@@ -779,11 +777,11 @@ export function WeChatPublishModal(props: Props) {
               <span className="wechatPreviewTheme">{theme?.name ?? ''}</span>
             </div>
             <div className="wechatPreviewActions">
-              <button type="button" className="lbBtn" onClick={() => void handleCopy()}>
+              <button type="button" className="lbBtn" disabled={previewPending || !!parsed.error || !!rendered.error} onClick={() => void handleCopy()}>
                 {copied ? <Check size={14} /> : <Copy size={14} />}
                 {copied ? t('wechatPublish.copied') : t('wechatPublish.copyHtml')}
               </button>
-              <button type="button" className="lbBtn primary" onClick={() => void handlePublishToWeChat()} disabled={publishing || imgLoading}>
+              <button type="button" className="lbBtn primary" onClick={() => void handlePublishToWeChat()} disabled={publishing || imgLoading || previewPending || !!parsed.error || !!rendered.error}>
                 {publishing ? <Loader2 size={14} className="wechatSpin" /> : <Send size={14} />}
                 {publishing ? t('wechatPublish.publishing') : t('wechatPublish.publish')}
               </button>
@@ -884,6 +882,8 @@ export function WeChatPublishModal(props: Props) {
 
       {(status || error) && (
         <div className="wechatPublishMsg">
+          {previewPending && <p role="status">正在更新预览…</p>}
+          {(parsed.error || rendered.error) && <p role="alert" className="settingsErr">{parsed.error || rendered.error}</p>}
           {status && <div className="settingsOk">{status}</div>}
           {error && <div className="settingsErr">{error}</div>}
         </div>

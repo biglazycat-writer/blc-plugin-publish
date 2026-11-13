@@ -70,3 +70,24 @@ describe('account settings save contract', () => {
     expect(element.textContent).toContain('credential-store unavailable');
   });
 });
+
+it('reports a successful allowlist check without claiming an IP was detected, then clears it on failure', async () => {
+  bridge.detectWeChatMPEgressIP.mockResolvedValueOnce({ ip: '', whitelisted: true }).mockRejectedValueOnce(new Error('connection unavailable'));
+  await act(async () => root.render(<WeChatMPPanel />));
+  const check = [...element.querySelectorAll<HTMLButtonElement>('.settingsActions button')].find(button => button.textContent?.includes('wechatmp.detect'))!;
+  await act(async () => check.click());
+  expect(element.querySelector('[role=status]')?.textContent).toBe('wechatmp.ipCheckPassed');
+  expect(element.textContent).not.toContain('wechatmp.egressNotDetected');
+  await act(async () => check.click());
+  expect(element.querySelector('[role=alert]')?.textContent).toBe('connection unavailable');
+  expect(element.textContent).not.toContain('wechatmp.ipCheckPassed');
+});
+
+it('shows a WeChat rejection even when its response has no parseable IP address', async () => {
+  bridge.detectWeChatMPEgressIP.mockResolvedValue({ ip: '', whitelisted: false, message: '请检查微信 IP 白名单' });
+  await act(async () => root.render(<WeChatMPPanel />));
+  const check = [...element.querySelectorAll<HTMLButtonElement>('.settingsActions button')].find(button => button.textContent?.includes('wechatmp.detect'))!;
+  await act(async () => check.click());
+  expect(element.querySelector('[role=alert]')?.textContent).toBe('请检查微信 IP 白名单');
+  expect(check.disabled).toBe(false);
+});

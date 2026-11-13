@@ -57,7 +57,7 @@ jobs:
 
       # 桌面端 extractArchive 只剥离 "package/" 前缀，并要求 package.json 位于解压根目录，
       # 因此归档顶层目录必须命名为 package（与 npm pack 一致），不能用「包名-版本」目录。
-      # 产物不含 node_modules；安装时勾选「准备依赖」由宿主执行 npm ci。
+      # 产物不含 node_modules；宿主自动准备运行依赖，已有 dist 不重新构建。
       - name: Package build output
         env:
           VERSION: ${{ steps.meta.outputs.version }}
@@ -66,6 +66,7 @@ jobs:
           rm -rf "$STAGE"
           mkdir -p "$STAGE"
           cp -r dist "$STAGE/dist"
+          cp -r vendor "$STAGE/vendor"
           cp package.json package-lock.json README.md "$STAGE/"
           if [ -f README.en.md ]; then cp README.en.md "$STAGE/"; fi
           if [ -f CHANGELOG.md ]; then cp CHANGELOG.md "$STAGE/"; fi
@@ -116,7 +117,7 @@ jobs:
             echo "Creating Release $TAG."
             gh release create "$TAG" \
               blc-plugin-publish-*.tgz blc-plugin-publish-*.tgz.sha256 \
-              --title "blc-plugin-publish $TAG" \
+              --title "微信公众号发布 $TAG · 大懒猫创作平台" \
               --notes-file "$NOTES"
           fi
           gh release view "$TAG" --json tagName,url,assets

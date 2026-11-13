@@ -5,13 +5,14 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 const mocks = vi.hoisted(() => ({
   view: { instanceId: 'view-one' } as { instanceId: string; state?: { draftKey?: string; page?: string } },
   rendered: null as ReactElement | null,
+  appearance: { getColorScheme: vi.fn(() => 'dark'), onDidChangeColorScheme: vi.fn((_listener: (mode: 'light' | 'dark') => void) => vi.fn()) }, ready: vi.fn(),
   readArticle: vi.fn(), invoke: vi.fn(), transfer: vi.fn(), setState: vi.fn(), accountSave: vi.fn(),
   save: undefined as (() => Promise<void>) | undefined,
 }));
 vi.mock('react-dom/client', () => ({ createRoot: () => ({ render: (value: ReactElement) => { mocks.rendered = value; } }) }));
 vi.mock('./bridge/publishing-api', () => ({
   readArticle: mocks.readArticle, invoke: mocks.invoke, transfer: mocks.transfer,
-  sdk: { context: async () => mocks.view, setState: mocks.setState, onSave: (handler: () => Promise<void>) => { mocks.save = handler; return () => { mocks.save = undefined; }; } },
+  sdk: { appearance: mocks.appearance, ready: mocks.ready, context: async () => mocks.view, setState: mocks.setState, onSave: (handler: () => Promise<void>) => { mocks.save = handler; return () => { mocks.save = undefined; }; } },
 }));
 vi.mock('./lib/content-model', () => ({ docToMarkdown: (text: string) => text, storedDocFromRaw: (text: string) => text }));
 vi.mock('./lib/editor-themes/theme-store', () => ({ useThemes: () => [] }));
@@ -41,18 +42,23 @@ beforeEach(async () => {
   mocks.readArticle.mockResolvedValue({ articleText: 'saved article', publishTitle: 'saved title' });
   mocks.invoke.mockResolvedValue({ saved: true }); mocks.transfer.mockResolvedValue('payload-one');
   mocks.setState.mockResolvedValue(undefined); mocks.accountSave.mockResolvedValue(undefined);
+  mocks.ready.mockResolvedValue(undefined);
+  vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) => { callback(0); return 1; });
+  vi.stubGlobal('cancelAnimationFrame', vi.fn());
   location.hash = '#/publish';
   element = document.createElement('div'); document.body.append(element);
   root = (await vi.importActual<typeof import('react-dom/client')>('react-dom/client')).createRoot(element);
 });
-afterEach(async () => { await act(async () => root.unmount()); element.remove(); vi.useRealTimers(); });
+afterEach(async () => { await act(async () => root.unmount()); element.remove(); vi.useRealTimers(); vi.unstubAllGlobals(); });
 async function mount() {
-  await import('./main');
+  const app = await import('./App'); app.mount(element);
   await act(async () => root.render(mocks.rendered));
+  await act(async () => { await vi.dynamicImportSettled(); });
 }
 async function button(text: string) {
   const target = [...element.querySelectorAll('button')].find(value => value.textContent === text)!;
   await act(async () => target.click());
+  await act(async () => { await vi.dynamicImportSettled(); });
 }
 async function edit(text: string) {
   await act(async () => {
@@ -78,14 +84,15 @@ describe('publishing view persistence', () => {
     mocks.view = { instanceId: 'reloaded-view', state: { draftKey: 'saved-draft', page: 'settings' } };
     await mount();
     expect(element.querySelector('nav [aria-current=page]')?.textContent).toBe('账号设置');
-    expect(mocks.readArticle).toHaveBeenCalledWith('saved-draft');
+    expect(mocks.readArticle).not.toHaveBeenCalled();
     await button('文章发布');
+    expect(mocks.readArticle).toHaveBeenCalledWith('saved-draft');
     expect(element.querySelector('textarea')?.value).toBe('saved article');
     expect(mocks.setState).toHaveBeenLastCalledWith({ draftKey: 'saved-draft', page: 'publish' }, false);
   });
 
   it('retains an edited draft after a failed host save and saves the latest content on retry', async () => {
-    vi.useFakeTimers(); await mount(); await edit('unsaved article');
+    await mount(); vi.useFakeTimers(); await edit('unsaved article');
     expect(mocks.setState).toHaveBeenLastCalledWith({ draftKey: 'view-one', page: 'publish' }, true);
     mocks.invoke.mockRejectedValueOnce(new Error('disk full'));
     await act(async () => { await expect(mocks.save!()).rejects.toThrow('disk full'); });
@@ -110,7 +117,7 @@ describe('publishing view persistence', () => {
   });
 
   it('coalesces edits during an in-flight save and finishes with the latest draft', async () => {
-    vi.useFakeTimers(); await mount(); await edit('first article');
+    await mount(); vi.useFakeTimers(); await edit('first article');
     let release!: () => void;
     mocks.invoke.mockImplementationOnce(() => new Promise<void>(resolve => { release = resolve; }));
     let first!: Promise<void>, second!: Promise<void>, third!: Promise<void>;
@@ -127,4 +134,14 @@ describe('publishing view persistence', () => {
     expect(element.querySelector('textarea')?.value).toBe('latest article');
     expect(mocks.setState).toHaveBeenLastCalledWith({ draftKey: 'view-one', page: 'publish' }, false);
   });
+});
+
+it('applies the resolved host mode and subscribes without changing article styling', async () => {
+  await mount();
+  expect(document.documentElement.dataset.colorScheme).toBe('dark');
+  expect(mocks.appearance.onDidChangeColorScheme).toHaveBeenCalledOnce();
+  const listener = mocks.appearance.onDidChangeColorScheme.mock.calls[0][0] as unknown as (mode: string) => void;
+  await act(async () => listener('light'));
+  expect(document.documentElement.dataset.colorScheme).toBe('light');
+  expect(mocks.ready).toHaveBeenCalledOnce();
 });

@@ -102,15 +102,18 @@ export const WeChatMPPanel = forwardRef<WeChatMPPanelHandle, { onDirtyChange?: (
 
   async function handleDetectIP() {
     setDetectingIP(true)
+    setEgressIP(null)
     setError('')
     setMessage('')
     try {
       const result = await publishingApi.detectWeChatMPEgressIP()
       setEgressIP(result)
       if (result.whitelisted) {
-        setMessage(t('wechatmp.ipWhitelisted', { ip: result.ip }))
+        setMessage(result.ip ? t('wechatmp.ipWhitelisted', { ip: result.ip }) : t('wechatmp.ipCheckPassed'))
       } else if (result.ip) {
         setError(t('wechatmp.ipDetected', { ip: result.ip }))
+      } else {
+        setError(result.message || t('wechatmp.ipCheckRejected'))
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : t('wechatmp.ipFailed'))
@@ -221,12 +224,6 @@ export const WeChatMPPanel = forwardRef<WeChatMPPanelHandle, { onDirtyChange?: (
           </div>
         )}
 
-        {egressIP && egressIP.whitelisted && (
-          <div className="settingsOk">
-            <Check size={14} /> {t('wechatmp.egressIpLabel')}{egressIP.ip || t('wechatmp.egressNotDetected')} {t('wechatmp.egressWhitelistedSuffix')}
-          </div>
-        )}
-
         {egressIP && !egressIP.whitelisted && egressIP.ip && (
           <div className="settingsWarn">
             <Network size={14} /> {t('wechatmp.egressIpLabel')}{egressIP.ip}
@@ -236,7 +233,7 @@ export const WeChatMPPanel = forwardRef<WeChatMPPanelHandle, { onDirtyChange?: (
           </div>
         )}
 
-        {message && <div className="settingsOk">{message}</div>}
+        {message && <div className="settingsOk" role="status">{message}</div>}
         {error && <div className="settingsErr" role="alert">{error}</div>}
       </section>
 

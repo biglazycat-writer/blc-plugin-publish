@@ -56,10 +56,22 @@ export default definePlugin(async ctx => {
     await store.save(store.articleFile(args.draftKey), store.consume(args.transferId));
     return { saved: true };
   });
-  ctx.commands.register('article.read', async (args: { draftKey?: string; offset?: number; limit?: number; hash?: string } = {}) => {
+  ctx.commands.register('article.read', async (args: { draftKey?: string; offset?: number; limit?: number; hash?: string } = {}, inv) => {
     const offset = args.offset ?? 0, limit = args.limit ?? 96 * 1024;
     if (!Number.isSafeInteger(offset) || offset < 0 || !Number.isSafeInteger(limit) || limit < 1 || limit > 96 * 1024) throw Error('无效的发布稿片段范围');
-    const text = store.serialize(await store.load(store.articleFile(args.draftKey), { articleText: '', publishTitle: '' }));
+    let article = await store.load<Record<string, unknown> | null>(store.articleFile(args.draftKey), null);
+    if (!article) {
+      article = { articleText: '', publishTitle: '' };
+      if (inv.documentId && inv.editorId && inv.workspaceId && inv.workspaceSession) {
+        const document = await readDocument(ctx.documents, {
+          workspaceId: inv.workspaceId, workspaceSession: inv.workspaceSession,
+          documentId: inv.documentId, editorId: inv.editorId, windowId: inv.windowId,
+        }, { signal: inv.signal });
+        article = { articleText: document.content, format: document.format, publishTitle: '' };
+      }
+      await store.save(store.articleFile(args.draftKey), article);
+    }
+    const text = store.serialize(article);
     const hash = createHash('sha256').update(text).digest('hex');
     if (offset > text.length) throw Error('无效的发布稿片段范围');
     if (offset > 0 && args.hash !== hash || args.hash && args.hash !== hash) throw Error('发布稿已变更，请重新读取');

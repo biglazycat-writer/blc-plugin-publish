@@ -15,6 +15,19 @@
   --fs-body: 14px; --fs-title: 16px; --fs-ui: 13px; --fs-meta: 12px; --fs-micro: 11px;
   --radius-lg: 10px; --radius-md: 6px; --ease-enter: .16s ease; --ease-fast: .12s ease;
 }
+:root[data-color-scheme="dark"] {
+  --bg: #191c23; --bg-base: #14171d; --bg-surface: #1d222b; --bg-elevated: #242a35;
+  --bg-sunken: #101319; --frame-surface: #191e27;
+  --text: #e4e8ef; --text-primary: #e4e8ef; --text-muted: #a1acbc;
+  --text-secondary: #a1acbc; --text-tertiary: #8490a3; --text-quaternary: #697587;
+  --text-disabled: #697587; --text-danger: #ff9388;
+  --border: #394353; --border-default: #394353; --border-light: #2c3441;
+  --border-subtle: #303948; --border-minimal: #29313e; --border-strong: #687991;
+  --accent: #8ab4f8; --accent-primary: #8ab4f8; --color-primary: #8ab4f8;
+  --color-primary-bg: #273d5e; --color-primary-light: #496789;
+  --fill-subtle: #232a35; --fill-light: #2b3442; --fill-moderate: #354153; --fill-strong: #475974;
+}
+:root[data-color-scheme="dark"] .settingsOk { color: #8ad6ae; }
 * { box-sizing: border-box; }
 body { margin: 0; }
 button, input, select, textarea { font: inherit; }
