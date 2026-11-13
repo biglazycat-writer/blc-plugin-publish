@@ -173,6 +173,25 @@ npm test             # node --test tests/*.test.mjs && vitest run
 
 ---
 
+## 发布版本
+
+本插件是 `private` 工程，**不发布到 npm**，版本以 GitHub Release 的形式分发。仓库自带 `.github/workflows/release.yml`，打标签即自动完成构建、测试与发版。
+
+发布步骤：
+
+1. 更新 `package.json` 的 `version`，在 `CHANGELOG.md` 里补对应段落，提交并推送到 `main`。
+2. 打标签并推送：`git tag -a v0.1.0 -m "blc-plugin-publish 0.1.0" && git push origin v0.1.0`。
+3. 工作流自动执行 `npm ci` → `typecheck` → `build` → `test`，然后创建（或更新）GitHub Release，附上 `blc-plugin-publish-<version>.tar.gz` 与 `.sha256` 校验文件，Release notes 自动生成。
+
+约束与说明：
+
+- 标签必须是 **`v` + `package.json` 版本**（例如版本 `0.1.0` 对应 `v0.1.0`），不一致时工作流直接报错退出。
+- 只做构建验证：Actions 页面手动运行 **Release** 工作流、`tag` 留空，会跑完整检查并把产物上传为 workflow artifact，不会创建 Release。
+- 产物只包含 `dist/`、`package.json`、`package-lock.json` 与文档，**不含 `node_modules`**；解压后仍需 `npm ci` 才能运行。
+- 该工作流只使用仓库自带的 `GITHUB_TOKEN`，不需要额外配置 npm token 或其他 secret。
+
+---
+
 ## 参与贡献
 
 见 [CONTRIBUTING.md](CONTRIBUTING.md)，变更记录见 [CHANGELOG.md](CHANGELOG.md)。
