@@ -9,9 +9,10 @@ This is an independent npm project. The SDK comes from the verified tgz included
 | Item | Value |
 | --- | --- |
 | Plugin ID / package | `blc-plugin-publish` |
-| Plugin version | `0.2.1` |
-| Host API | `biglazycat.apiVersion = 1`, `minimumApiRevision = 2` |
-| SDK | `vendor/blc-plugin-sdk-1.2.0.tgz` (verified candidate artifact) |
+| Plugin version | `0.2.2` |
+| Required client | 大懒猫创作平台 **v0.4.5 or later** |
+| Host API | `biglazycat.apiVersion = 1`, `minimumApiRevision = 3` |
+| SDK | `vendor/blc-plugin-sdk-1.3.0.tgz` (verified candidate artifact) |
 | Runtime | Node `>=22.23.3 <23.0.0`, configured by the host |
 | Declared platforms | Windows, macOS and Linux; amd64/arm64 |
 | View stack | React 19, TypeScript, Vite 7 and Vitest |
@@ -21,6 +22,8 @@ This is an independent npm project. The SDK comes from the verified tgz included
 **Account and connectivity.** Configure AppID/AppSecret and an optional HTTP(S) proxy without embedded credentials. Connection tests verify credentials and cache `access_token`, refreshing 300 seconds early and sharing concurrent token requests. “Check WeChat IP allowlist” checks whether WeChat accepts the connection and extracts the egress IP from a `40164` rejection. A successful check may not return an IP. Common WeChat API errors are mapped to readable messages.
 
 **Writing and formatting.** Edit Markdown and preview WeChat-compatible HTML with ten bundled layout themes. The renderer supports code highlighting, KaTeX, Mermaid rendered before export, table column widths, captions, a table of contents and rich-text blocks. Export inlines styles and preserves text entities and image URLs while applying WeChat HTML constraints.
+
+**Return to the original article.** The plugin supplies its own back button only when the source document is known. It saves the local publishing draft before requesting host navigation and keeps the view open on failure.
 
 **Images and covers.** Body images are re-encoded to at most 1 MiB and uploaded through `media/uploadimg`. A failed body image upload is reported without necessarily aborting the whole draft. Covers use the permanent-material endpoint with a 10 MiB limit and centered `2.35:1` / `1:1` crop metadata. The material picker loads up to 20 items per page. Input data URLs are validated, with a 20 MiB image limit and a 40-million-pixel `sharp` limit.
 
@@ -83,14 +86,14 @@ The command palette contains only publishing and account settings. All commands 
 
 The view labels automatic persistence as a local publishing draft and offers a retry when saving fails. Local saving neither creates a remote WeChat draft nor overwrites the source article. Account settings keep their own save action.
 
-The updated desktop host provides “Return to original article”, saving the publishing draft before focusing the original tab. Failed saves keep the publishing view open. The redundant toolbar save button is removed; keyboard, close and reload saves remain available.
+The plugin provides “Return to original article” in its own header when the source context is complete. It saves the local publishing draft and account edits before requesting host navigation. Save or navigation failures keep the plugin page open and show the reason. The plugin controls its title and actions; the host adds no fixed back, title or refresh bar. Keyboard and close saves remain available.
 
 ## Develop from source
 
-Use Node `>=22.23.3 <23.0.0`, npm `>=10.9.9 <11.0.0` and a host supporting API 1 revision 2. The host checks the actual selected Node against `engines.node`; native dependencies still need validation on each target system.
+Use Node `>=22.23.3 <23.0.0`, npm `>=10.9.9 <11.0.0` and a host supporting API 1 revision 3. The host checks the actual selected Node against `engines.node`; native dependencies still need validation on each target system.
 
 ```bash
-npm ci                 # Install the local SDK 1.2.0 artifact and locked dependencies
+npm ci                 # Install the local SDK 1.3.0 artifact and locked dependencies
 npm run typecheck      # Check browser and backend TypeScript
 npm run build          # Compile the backend and bundle the view
 npm test               # Backend integration tests and Vitest UI tests
@@ -139,8 +142,8 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) and [CHANGELOG.md](CHANGELOG.md), current
 
 The [SDK](https://github.com/biglazycat-writer/blc-plugin-sdk) is MIT licensed. Licensing for the rest of this repository has not been specified by its maintainer; do not assume the entire project uses the SDK's license.
 
-## 0.2.1 host requirements
+## 0.2.2 host requirements
 
-Requires host API 1 revision 2. The UI follows the resolved host light/dark mode; exported article styling remains independent. Only publishing and account settings appear in the command palette. The verified SDK 1.2.0 tarball is included in vendor for independent builds and installation.
+Requires host API 1 revision 3. The UI follows the resolved host light/dark mode; exported article styling remains independent. Only publishing and account settings appear in the command palette. The verified SDK 1.3.0 tarball is included in vendor for independent builds and installation.
 
-The blank-page fix, return action and dismissal of successful page-opening task notifications are desktop host changes. Install a desktop build containing these changes alongside this plugin update.
+The plugin owns its back button and calls the new host `ui.openDocument` capability. Update the desktop host to API 1 revision 3 alongside this plugin; older hosts explicitly reject this version. Loading and fault recovery remain host responsibilities, while normal plugin page layout and controls belong to the plugin.

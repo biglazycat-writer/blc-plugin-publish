@@ -3,16 +3,16 @@ import type { Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
-  view: { instanceId: 'view-one' } as { instanceId: string; state?: { draftKey?: string; page?: string } },
+  view: { instanceId: 'view-one' } as { instanceId: string; state?: { draftKey?: string; page?: string }; context?: { workspaceId?: string; workspaceSession?: string; documentId?: string } },
   rendered: null as ReactElement | null,
   appearance: { getColorScheme: vi.fn(() => 'dark'), onDidChangeColorScheme: vi.fn((_listener: (mode: 'light' | 'dark') => void) => vi.fn()) }, ready: vi.fn(),
-  readArticle: vi.fn(), invoke: vi.fn(), transfer: vi.fn(), setState: vi.fn(), accountSave: vi.fn(),
+  readArticle: vi.fn(), invoke: vi.fn(), transfer: vi.fn(), setState: vi.fn(), accountSave: vi.fn(), openDocument: vi.fn(),
   save: undefined as (() => Promise<void>) | undefined,
 }));
 vi.mock('react-dom/client', () => ({ createRoot: () => ({ render: (value: ReactElement) => { mocks.rendered = value; } }) }));
 vi.mock('./bridge/publishing-api', () => ({
   readArticle: mocks.readArticle, invoke: mocks.invoke, transfer: mocks.transfer,
-  sdk: { appearance: mocks.appearance, ready: mocks.ready, context: async () => mocks.view, setState: mocks.setState, onSave: (handler: () => Promise<void>) => { mocks.save = handler; return () => { mocks.save = undefined; }; } },
+  sdk: { ui: { openDocument: mocks.openDocument }, appearance: mocks.appearance, ready: mocks.ready, context: async () => mocks.view, setState: mocks.setState, onSave: (handler: () => Promise<void>) => { mocks.save = handler; return () => { mocks.save = undefined; }; } },
 }));
 vi.mock('./lib/content-model', () => ({ docToMarkdown: (text: string) => text, storedDocFromRaw: (text: string) => text }));
 vi.mock('./lib/editor-themes/theme-store', () => ({ useThemes: () => [] }));
@@ -43,6 +43,7 @@ beforeEach(async () => {
   mocks.invoke.mockResolvedValue({ saved: true }); mocks.transfer.mockResolvedValue('payload-one');
   mocks.setState.mockResolvedValue(undefined); mocks.accountSave.mockResolvedValue(undefined);
   mocks.ready.mockResolvedValue(undefined);
+  mocks.openDocument.mockResolvedValue(undefined);
   vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) => { callback(0); return 1; });
   vi.stubGlobal('cancelAnimationFrame', vi.fn());
   location.hash = '#/publish';
@@ -178,6 +179,66 @@ describe('publishing view persistence', () => {
     expect(mocks.invoke).toHaveBeenCalledTimes(2);
     expect(element.querySelector('textarea')?.value).toBe('latest article');
     expect(mocks.setState).toHaveBeenLastCalledWith({ draftKey: 'view-one', page: 'publish' }, false);
+  });
+});
+
+describe('plugin-owned return to the original article', () => {
+  const origin = { workspaceId: 'workspace', workspaceSession: 'session', documentId: 'article' };
+  it.each([undefined, {}, { workspaceId: 'workspace', documentId: 'article' }, { workspaceId: 'workspace', workspaceSession: 'session' }])('omits its return button without a complete origin: %o', async context => {
+    mocks.view.context = context; await mount();
+    expect(element.textContent).not.toContain('返回原文章');
+    expect(mocks.openDocument).not.toHaveBeenCalled();
+  });
+
+  it('renders its own header button and saves the draft before calling host navigation', async () => {
+    mocks.view.context = origin; await mount(); await edit('edited publishing draft');
+    let finish!: () => void;
+    mocks.invoke.mockImplementationOnce(() => new Promise<void>(resolve => { finish = resolve; }));
+    await button('返回原文章');
+    const back = element.querySelector<HTMLButtonElement>('.publisherHeader .publisherBack')!;
+    expect(back.disabled).toBe(true); expect(back.textContent).toContain('正在返回');
+    expect(mocks.openDocument).not.toHaveBeenCalled();
+    await act(async () => finish());
+    expect(mocks.transfer).toHaveBeenLastCalledWith({ articleText: 'edited publishing draft', publishTitle: 'saved title' });
+    expect(mocks.setState).toHaveBeenLastCalledWith({ draftKey: 'view-one', page: 'publish' }, false);
+    expect(mocks.openDocument).toHaveBeenCalledWith(origin);
+    expect(back.disabled).toBe(false);
+  });
+
+  it('keeps the edited publishing draft when saving fails and does not navigate', async () => {
+    mocks.view.context = origin; await mount(); await edit('unsaved publishing draft');
+    mocks.invoke.mockRejectedValueOnce(new Error('disk full'));
+    await button('返回原文章');
+    expect(mocks.openDocument).not.toHaveBeenCalled();
+    expect(element.textContent).toContain('无法返回原文章：disk full');
+    expect(element.querySelector('textarea')?.value).toBe('unsaved publishing draft');
+    expect(element.querySelector<HTMLButtonElement>('.publisherBack')?.disabled).toBe(false);
+  });
+
+  it('saves account edits too and stays on settings when account save fails', async () => {
+    mocks.view.context = origin; mocks.view.state = { page: 'settings' }; await mount();
+    await button('edit account'); mocks.accountSave.mockRejectedValueOnce(new Error('credential unavailable'));
+    await button('返回原文章');
+    expect(mocks.openDocument).not.toHaveBeenCalled();
+    expect(element.textContent).toContain('无法返回原文章：credential unavailable');
+    expect(element.querySelector('nav [aria-current=page]')?.textContent).toBe('账号设置');
+    await button('返回原文章');
+    expect(mocks.openDocument).toHaveBeenCalledWith(origin);
+    expect(mocks.accountSave).toHaveBeenCalledTimes(2);
+  });
+
+  it('reports navigation errors in its own page and prevents duplicate requests', async () => {
+    mocks.view.context = origin; await mount();
+    let fail!: (error: Error) => void;
+    mocks.openDocument.mockImplementationOnce(() => new Promise<void>((_resolve, reject) => { fail = reject; }));
+    const back = element.querySelector<HTMLButtonElement>('.publisherBack')!;
+    await act(async () => { back.click(); back.click(); });
+    expect(mocks.openDocument).toHaveBeenCalledOnce();
+    await act(async () => fail(Object.assign(new Error('工作区已切换或关闭'), { code: 'WORKSPACE_CHANGED' })));
+    expect(element.textContent).toContain('无法返回原文章：工作区已切换或关闭');
+    expect(element.querySelector('textarea')?.value).toBe('saved article');
+    expect(back.disabled).toBe(false);
+    await button('返回原文章'); expect(mocks.openDocument).toHaveBeenCalledTimes(2);
   });
 });
 

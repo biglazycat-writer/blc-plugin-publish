@@ -28,7 +28,7 @@ test('the command palette contains only publishing and account settings', async 
   assert.deepEqual(contributions.commands.filter(command=>command.visibility!=='internal').map(command=>command.id),['publish.open']);
   assert.deepEqual(contributions.views.filter(view=>view.commandPalette!==false).map(view=>view.id),['settings']);
   assert.equal(contributions.commands.find(command=>command.id==='debug.status').aiCallable,true);
-  assert.equal(pkg.biglazycat.minimumApiRevision,2);
+  assert.equal(pkg.biglazycat.minimumApiRevision,3);
 });
 
 test('publish opens an immutable Markdown export without parsing host editor JSON', async t => {

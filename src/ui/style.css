@@ -27,7 +27,11 @@
   --color-primary-bg: #273d5e; --color-primary-light: #496789;
   --fill-subtle: #232a35; --fill-light: #2b3442; --fill-moderate: #354153; --fill-strong: #475974;
 }
-:root[data-color-scheme="dark"] .settingsOk { color: #8ad6ae; }
+:root[data-color-scheme="dark"] .settingsOk { color: #8ad6ae; background: rgba(138, 214, 174, 0.12); }
+:root[data-color-scheme="dark"] .settingsErr { background: rgba(255, 147, 136, 0.1); }
+:root[data-color-scheme="dark"] .settingsWarn { color: #e0b25a; background: rgba(224, 178, 90, 0.12); }
+:root[data-color-scheme="dark"] .publisherHeader small[role=status].dirty { color: #e0b25a; }
+:root[data-color-scheme="dark"] .publisherHeader nav [aria-current=page] { box-shadow: 0 1px 3px rgba(0, 0, 0, 0.45); }
 * { box-sizing: border-box; }
 body { margin: 0; }
 button, input, select, textarea { font: inherit; }
@@ -37,37 +41,116 @@ button {
 }
 button:disabled { opacity: .5; cursor: default; }
 input, select, textarea {
-  padding: 8px; border: 1px solid var(--border-default); border-radius: 5px;
+  padding: 8px; border: 1px solid var(--border-default); border-radius: 6px;
   color: inherit; background: var(--bg-surface);
 }
 .publisher { height: 100vh; display: flex; flex-direction: column; min-width: 0; }
+
+/* ===== 顶部工具条 ===== */
 .publisherHeader {
-  display: flex; align-items: center; gap: 20px; flex: 0 0 auto;
-  padding: 14px 22px; background: var(--bg-surface); border-bottom: 1px solid var(--border-default);
+  display: flex; align-items: center; gap: 18px; flex: 0 0 auto;
+  padding: 12px 20px; background: var(--bg-surface); border-bottom: 1px solid var(--border-default);
 }
-.publisherHeader > div { margin-right: auto; }
-.publisherHeader strong { display: block; }
-.publisherHeader small { font-size: 11px; color: var(--text-secondary); }
-.publisherHeader nav { display: flex; gap: 6px; }
-.publisherHeader [aria-current=page] { background: var(--color-primary-bg); border-color: var(--color-primary-light); }
-.publisherHeader label { font-size: 12px; }
+.publisherHeader > div { margin-right: auto; min-width: 0; }
+.publisherHeader .publisherBack { display: inline-flex; align-items: center; gap: 5px; flex: none; white-space: nowrap; font-size: 13px; }
+.publisherHeader strong { display: block; font-size: 15px; font-weight: 650; letter-spacing: .2px; }
+.publisherHeader small { font-size: 11px; color: var(--text-tertiary); }
+.publisherHeader > div small { display: block; margin-top: 2px; }
+.publisherHeader small[role=status] { flex: none; font-size: 12px; color: var(--text-tertiary); white-space: nowrap; }
+.publisherHeader small[role=status].dirty { color: #9a6a15; }
+.publisherHeader small[role=status].error { color: var(--text-danger); }
+/* 分段式页签：灰底轨道 + 浮起的活动页 */
+.publisherHeader nav {
+  display: flex; gap: 2px; flex: none; padding: 3px;
+  background: var(--bg-sunken); border-radius: 9px;
+}
+.publisherHeader nav button {
+  padding: 5px 14px; border: none; border-radius: 6px; background: transparent;
+  color: var(--text-secondary); font-size: 13px; font-weight: 500; line-height: 1.4;
+  transition: background var(--ease-fast), color var(--ease-fast);
+}
+.publisherHeader nav button:hover:not([aria-current=page]) { color: var(--text-primary); }
+.publisherHeader nav [aria-current=page] {
+  background: var(--bg-surface); color: var(--text-primary); font-weight: 600;
+  box-shadow: 0 1px 3px rgba(23, 33, 52, 0.16);
+}
+/* 排版主题选择器：自绘箭头的紧凑下拉框 */
+.themePicker {
+  display: inline-flex; align-items: center; gap: 8px; flex: none;
+  font-size: 13px; color: var(--text-secondary); white-space: nowrap;
+}
+.themePicker select {
+  appearance: none; -webkit-appearance: none;
+  height: 32px; padding: 0 30px 0 12px;
+  border: 1px solid var(--border-default); border-radius: 8px;
+  color: var(--text-primary); font-size: 13px; cursor: pointer;
+  background: var(--bg-surface) url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238490a0' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 10px center;
+  transition: border-color var(--ease-fast), box-shadow var(--ease-fast);
+}
+.themePicker select:hover { border-color: var(--border-strong); }
+.themePicker select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--color-primary-bg); }
 .publisher > .wechatPublishWorkspace { flex: 1; min-height: 0; }
-.accountSettings { padding: 24px; max-width: 860px; margin: 0 auto; overflow: auto; width: 100%; }
-.settingsPanel { padding: 24px; background: var(--bg-surface); border: 1px solid var(--border-default); border-radius: 10px; margin-bottom: 18px; }
-.settingsPanel h3 { margin: 0 0 8px; }
+
+/* ===== 账号设置页 ===== */
+.accountSettings { padding: 28px 24px 40px; max-width: 860px; margin: 0 auto; overflow: auto; width: 100%; }
+.settingsCardStack { display: flex; flex-direction: column; gap: 16px; }
+.settingsCardStack .settingsPanel { margin-bottom: 0; }
+.settingsPanel {
+  padding: 24px; background: var(--bg-surface); border: 1px solid var(--border-light);
+  border-radius: 12px; margin-bottom: 18px;
+  box-shadow: 0 1px 2px rgba(23, 33, 52, 0.05);
+}
+.settingsPanel h3 { margin: 0 0 6px; font-size: 15px; font-weight: 600; }
 .settingsPanel p, .settingsHint { font-size: 13px; line-height: 1.65; color: var(--text-secondary); }
-.settingsPanel label { display: block; margin: 16px 0; }
-.settingsPanel input:not([type=checkbox]) { display: block; width: 100%; margin-top: 6px; }
-.settingsPanel button { margin: 0; flex: none; }
-.settingsOk { color: #207149; padding: 10px; }
-.settingsErr { color: var(--text-danger); padding: 10px; overflow-wrap: anywhere; }
 .settingsSectionHead { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 16px; justify-content: space-between; }
 .settingsSectionHead > div { flex: 1 1 240px; min-width: 0; }
-.settingsActions { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; padding-top: 4px; }
+.settingsSectionHead p { margin: 0; }
+.settingsPanel label { display: block; margin: 18px 0 0; }
+.settingsPanel .lbFieldLabel {
+  display: block; margin-bottom: 7px;
+  font-size: 13px; font-weight: 600; color: var(--text-secondary);
+}
+.settingsPanel input:not([type=checkbox]) {
+  display: block; width: 100%; margin-top: 0;
+  padding: 9px 12px; border-radius: 8px;
+  transition: border-color var(--ease-fast), box-shadow var(--ease-fast);
+}
+.settingsPanel input:not([type=checkbox])::placeholder { color: var(--text-quaternary); }
+.settingsPanel input:not([type=checkbox]):focus {
+  outline: none; border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--color-primary-bg);
+}
+.settingsPanel button { margin: 0; flex: none; }
+.settingsActions { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+.settingsOk, .settingsErr, .settingsWarn { margin-top: 14px; }
+.settingsOk {
+  display: flex; align-items: flex-start; flex-wrap: wrap; gap: 4px 8px;
+  padding: 10px 12px; border-radius: 8px;
+  color: #207149; background: rgba(32, 113, 73, 0.08);
+}
+.settingsOk svg { flex: none; margin-top: 3px; }
+.settingsErr {
+  color: var(--text-danger); background: rgba(173, 52, 40, 0.08);
+  padding: 10px 12px; border-radius: 8px; overflow-wrap: anywhere;
+}
+.settingsWarn {
+  display: flex; align-items: flex-start; flex-wrap: wrap; gap: 4px 8px;
+  padding: 10px 12px; border-radius: 8px;
+  color: #9a6a15; background: rgba(154, 106, 21, 0.1);
+}
+.settingsWarn svg { flex: none; margin-top: 3px; }
+.settingsWarn > .settingsHint { flex: 1 1 100%; }
+/* 配置说明步骤：浅底提示块 */
+.settingsSteps {
+  display: flex; flex-direction: column; gap: 9px;
+  margin-top: 14px; padding: 14px 16px;
+  background: var(--fill-subtle); border-radius: 8px;
+}
+.settingsSteps p { margin: 0; }
 .wechatPublishBody { height: 100%; min-height: 0; }
 @media (max-width: 1000px) {
   .publisherHeader { flex-wrap: wrap; gap: 10px; }
-  .publisherHeader label { margin-left: auto; }
+  .publisherHeader .themePicker { margin-left: auto; }
 }
 @media (max-width: 640px) {
   .accountSettings { padding: 16px; }

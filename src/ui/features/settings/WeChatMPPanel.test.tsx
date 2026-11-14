@@ -43,6 +43,16 @@ describe('account settings save contract', () => {
     expect(buttons[2].disabled).toBe(true);
     expect(element.querySelector('.settingsSectionHead button')?.classList.contains('lbBtn')).toBe(true);
   });
+  it('keeps the connection test disabled but the IP check available until a secret is saved', async () => {
+    bridge.getWeChatMPConfig.mockResolvedValue({ app_id: '', app_secret: '', proxy_url: '', secret_configured: false });
+    await act(async () => root.render(<WeChatMPPanel />));
+    const buttons = [...element.querySelectorAll<HTMLButtonElement>('.settingsActions button')];
+    expect(buttons.map(button => button.textContent?.trim())).toEqual(['wechatmp.save', 'wechatmp.test', 'wechatmp.detect']);
+    expect(buttons[1].disabled).toBe(true);
+    expect(buttons[1].title).toBe('wechatmp.needSecret');
+    expect(buttons[2].disabled).toBe(false);
+    expect(buttons[2].title).toBe('wechatmp.egressOnly');
+  });
   it('marks edits dirty and saves through the host save handler without retaining a secret', async () => {
     const ref = createRef<WeChatMPPanelHandle>(), changed = vi.fn();
     await act(async () => root.render(<WeChatMPPanel ref={ref} onDirtyChange={changed} />));

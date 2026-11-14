@@ -9,9 +9,10 @@
 | 项目 | 值 |
 | --- | --- |
 | 插件 ID / 包名 | `blc-plugin-publish` |
-| 版本 | `0.2.1` |
-| 插件 API | `biglazycat.apiVersion = 1`、`minimumApiRevision = 2` |
-| SDK | `vendor/blc-plugin-sdk-1.2.0.tgz`（已验证的待发布工件） |
+| 版本 | `0.2.2` |
+| 客户端要求 | 大懒猫创作平台 **v0.4.5 及以上** |
+| 插件 API | `biglazycat.apiVersion = 1`、`minimumApiRevision = 3` |
+| SDK | `vendor/blc-plugin-sdk-1.3.0.tgz`（已验证的待发布工件） |
 | 运行环境 | Node `>=22.23.3 <23.0.0`（宿主提供，安装包不内嵌 Node） |
 | 支持平台 | Windows amd64/arm64、macOS amd64/arm64、Linux amd64/arm64 |
 | UI 技术 | React 19 + TypeScript + Vite 7 + Vitest |
@@ -45,6 +46,7 @@
 - 从编辑器命令「发布当前文章」进入时，通过 `readDocument`（`documents.export`）读取当前文章快照作为插件自己的发布稿；也可直接粘贴 Markdown。
 - 编辑、封面和排版设置自动保存到插件私有数据（700 ms 防抖 + 宿主保存钩子），**不覆盖原文**。
 - 页面显示“本地发布稿已保存”；失败时保留内容并可“重试保存”。本地保存不创建微信后台草稿；账号设置仍需保存。
+- 插件自己提供“返回原文章”按钮，只有原文章上下文完整时显示；先保存本地发布稿，再调用宿主文稿导航能力，失败时留在发布页面。
 - 大稿件分段传输：96 KiB 分片、总量 ≤ 32 MiB、顺序校验、5 分钟过期、最多 4 个在途传输；读取时用 SHA-256 校验一致性，内容变更会拒绝续读。
 - 调用 `draft/add` 创建草稿，返回草稿 ID 与图片上传结果。标题 1–64 字符、摘要截断至 120 字符。
 
@@ -116,14 +118,14 @@
 4. 在编辑器执行「发布当前文章」（或工具栏按钮），选择主题、封面，预览后点「创建草稿」。
 5. 到公众号后台草稿箱预览确认，再手动发表。
 
-新版桌面端的发布页面顶部提供“返回原文章”，先保存本地发布稿，再定位到原文章标签；保存失败时会留在发布页。顶部不再显示重复的保存按钮，快捷键、关闭页面和重新加载仍会执行保存。
+插件自己的发布页面顶部提供“返回原文章”，仅在原文上下文完整时显示；先保存本地发布稿与账号修改，再请求宿主定位原文章标签。保存或导航失败会留在插件页并显示原因。页面标题和操作由插件控制，宿主不再添加固定的返回、标题或刷新栏；快捷键与关闭页面仍会执行保存。
 
 ### 方式二：从源码开发
 
 需要 Node >=22.23.3 <23.0.0 与大懒猫创作平台 API 1 修订 2。宿主按选定运行时的实际版本校验 engines；公众号插件的原生依赖仍须在目标系统验证。
 
 ```bash
-npm ci               # 从锁文件安装本地 SDK 1.2.0 工件与其余依赖
+npm ci               # 从锁文件安装本地 SDK 1.3.0 工件与其余依赖
 npm run typecheck    # 前后台两份 tsconfig 的严格类型检查
 npm run build        # tsc -p tsconfig.node.json && vite build
 npm test             # node --test tests/*.test.mjs && vitest run
@@ -131,7 +133,7 @@ npm test             # node --test tests/*.test.mjs && vitest run
 
 `npm run build` 生成 `dist/main.js`、`dist/publishing-store.js`、`dist/wechat.js` 与 `dist/ui/`；`dist/` 与 `node_modules/` 都不进版本库，`package-lock.json` 需要提交。
 
-SDK 固定使用 `vendor/blc-plugin-sdk-1.2.0.tgz`，完整工件随源码和安装包分发；其他依赖首次安装仍需访问 npm registry。宿主按 `package-lock.json` 自动准备依赖，已有完整 `dist` 时跳过类型检查和构建。
+SDK 固定使用 `vendor/blc-plugin-sdk-1.3.0.tgz`，完整工件随源码和安装包分发；其他依赖首次安装仍需访问 npm registry。宿主按 `package-lock.json` 自动准备依赖，已有完整 `dist` 时跳过类型检查和构建。
 
 ### 方式三：外部 AI / MCP 开发
 
@@ -184,12 +186,12 @@ SDK 固定使用 `vendor/blc-plugin-sdk-1.2.0.tgz`，完整工件随源码和安
 发布步骤：
 
 1. 更新 `package.json` 的 `version`，在 `CHANGELOG.md` 里补对应段落，提交并推送到 `main`。
-2. 打标签并推送：`git tag -a v0.2.1 -m "blc-plugin-publish 0.2.1" && git push origin v0.2.1`。
+2. 打标签并推送：`git tag -a v0.2.2 -m "blc-plugin-publish 0.2.2" && git push origin v0.2.2`。
 3. 工作流自动执行 `npm ci` → `typecheck` → `build` → `test`，然后创建（或更新）GitHub Release，附上 `blc-plugin-publish-<version>.tgz` 与 `.sha256` 校验文件；Release notes 从 `CHANGELOG.md` 中该版本段落提取，末尾附提交对比链接。
 
 约束与说明：
 
-- 标签必须是 **`v` + `package.json` 版本**（例如版本 `0.2.1` 对应 `v0.2.1`），不一致时工作流直接报错退出。
+- 标签必须是 **`v` + `package.json` 版本**（例如版本 `0.2.2` 对应 `v0.2.2`），不一致时工作流直接报错退出。
 - 只做构建验证：Actions 页面手动运行 **Release** 工作流、`tag` 留空，会跑完整检查并把产物上传为 workflow artifact，不会创建 Release。
 - 产物是 `.tgz`，归档**顶层目录固定为 `package/`**（与 `npm pack` 一致）。桌面端解压时只剥离 `package/` 前缀，并要求 `package.json` 位于解压根目录；若用「包名-版本」作为顶层目录，安装会报找不到 `package.json`。
 - 产物包含 `dist/`、`package.json`、`package-lock.json`、`vendor/` 中的 SDK 工件与文档，**不含 `node_modules`**。桌面端自动识别已有构建产物，只安装运行依赖，无需用户判断是否类型检查或构建。
@@ -207,14 +209,14 @@ SDK 包 [blc-plugin-sdk](https://github.com/biglazycat-writer/blc-plugin-sdk) �
 
 ## SDK 与平台支持
 
-本工程固定使用 SDK 1.2.0 tgz 工件。页面调用通过 `waitForTask` 有限等待；超时后查询现有任务，不自动重新提交有副作用的操作。
+本工程固定使用 SDK 1.3.0 tgz 工件。页面调用通过 `waitForTask` 有限等待；超时后查询现有任务，不自动重新提交有副作用的操作。
 
 构建目标为 ES2022 / Chromium 109 / Safari 16.4。当前更新在 Windows amd64 完成测试；平台声明与编译目标不代表所有系统 WebView、原生依赖均已完成实机验证。
 
-## 0.2.1 与宿主要求
+## 0.2.2 与宿主要求
 
-此版本需要大懒猫创作平台 API 1 修订 2。界面跟随宿主白天/黑夜模式，公众号排版与导出配色独立。命令面板仅显示“发布当前文章”和“公众号账号设置”；连接与 IP 白名单检查在账号设置页进行。
+此版本需要大懒猫创作平台 API 1 修订 3。界面跟随宿主白天/黑夜模式，公众号排版与导出配色独立。命令面板仅显示“发布当前文章”和“公众号账号设置”；连接与 IP 白名单检查在账号设置页进行。
 
-发布页与设置页分开加载，预览计算在界面提交后执行，输入期间合并重复计算。宿主插件诊断提供容器、资源加载、桥接和 UI 就绪耗时。SDK 1.2.0 以 vendor 中的固定 tgz 工件随插件分发，因此构建和安装不依赖另一个源码目录或尚未发布的 npm 版本。
+发布页与设置页分开加载，预览计算在界面提交后执行，输入期间合并重复计算。宿主插件诊断提供容器、资源加载、桥接和 UI 就绪耗时。SDK 1.3.0 以 vendor 中的固定 tgz 工件随插件分发，因此构建和安装不依赖另一个源码目录或尚未发布的 npm 版本。
 
-白屏修复、返回原文章与打开页面后收起任务提示属于宿主能力，须配合包含这些修改的新版桌面端；仅升级插件安装包无法更新宿主界面。
+返回按钮由本插件提供，调用宿主新增的 `ui.openDocument` 文稿导航能力。请同时更新支持 API 1 修订 3 的桌面端；旧桌面端会明确拒绝安装此版本。加载与故障恢复由宿主维护，正常插件页面的布局和控件由插件决定。

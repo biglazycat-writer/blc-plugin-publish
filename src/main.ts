@@ -1,6 +1,6 @@
 import { definePlugin, readDocument, type Invocation } from 'blc-plugin-sdk';
 import { createHash, randomUUID } from 'node:crypto';
-import { WeChatClient, type Draft } from './wechat.js';
+import { WeChatClient, echoIP, type Draft } from './wechat.js';
 import { createPublishingStore } from './publishing-store.js';
 
 type Account = { app_id?: string; proxy_url?: string; last_verified_at?: string };
@@ -46,7 +46,13 @@ export default definePlugin(async ctx => {
     await store.save('account.json', { ...await account(), last_verified_at: new Date().toISOString() });
     return config();
   });
-  ctx.commands.register('connection.ip', async (_, inv) => (await connection()).detectIP(signal(inv)));
+  ctx.commands.register('connection.ip', async (_, inv) => {
+    const sig = AbortSignal.any([inv.signal, AbortSignal.timeout(20000)]);
+    if (await ctx.credentials.get('wechat-app-secret')) return (await connection()).detectIP(sig);
+    // 未配置密钥时无法走微信接口校验，退化为公共回显服务：先拿到出口 IP 供用户加入白名单。
+    const result = await echoIP((await account()).proxy_url ?? '', sig);
+    return { ...result, whitelisted: false, message: '未配置 AppSecret，出口 IP 来自公共回显服务，尚未向微信验证白名单' };
+  });
   ctx.commands.register('materials.list', async (args: { offset?: number; count?: number }, inv) =>
     (await connection()).materials(args.offset ?? 0, args.count ?? 20, signal(inv)));
   ctx.commands.register('draft.create', async (args: { transferId: string }, inv) =>

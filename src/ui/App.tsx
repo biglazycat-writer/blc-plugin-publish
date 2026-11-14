@@ -2,6 +2,7 @@ import React, { lazy, Suspense, useCallback, useEffect, useRef, useState } from 
 import { createRoot } from 'react-dom/client';
 import i18next from 'i18next';
 import { initReactI18next } from 'react-i18next';
+import { ArrowLeft } from 'lucide-react';
 import writing from './i18n/zh-CN/writing.json';
 import settings from './i18n/zh-CN/settings.json';
 import common from './i18n/zh-CN/common.json';
@@ -22,6 +23,8 @@ await i18next.use(initReactI18next).init({
 const view = await sdk.context();
 const draftKey = (view.state as { draftKey?: string } | undefined)?.draftKey ?? view.instanceId;
 const restoredPage = (view.state as { page?: string } | undefined)?.page;
+const origin = view.context;
+const canReturnToArticle = !!(origin?.workspaceId && origin.workspaceSession && origin.documentId);
 
 function App() {
   const [page, setPage] = useState(restoredPage === 'settings' || restoredPage === 'publish' ? restoredPage : location.hash.includes('settings') ? 'settings' : 'publish');
@@ -31,6 +34,8 @@ function App() {
   const [saveError, setSaveError] = useState('');
   const [saved, setSaved] = useState(true);
   const [accountDirty, setAccountDirty] = useState(false);
+  const [returning, setReturning] = useState(false);
+  const returningRef = useRef(false);
   const latest = useRef<PublishDraft | null>(null);
   const articleSaved = useRef(true);
   const settingsDirty = useRef(false);
@@ -116,15 +121,28 @@ function App() {
     } catch (e) { setError(String(e)); }
   };
 
+  const returnToArticle = async () => {
+    if (!canReturnToArticle || returningRef.current) return;
+    returningRef.current = true;
+    setReturning(true);
+    setError('');
+    try {
+      await saveAll();
+      await sdk.ui.openDocument({ workspaceId: origin.workspaceId!, workspaceSession: origin.workspaceSession!, documentId: origin.documentId! });
+    } catch (e) { setError(`无法返回原文章：${e instanceof Error ? e.message : String(e)}`); }
+    finally { returningRef.current = false; setReturning(false); }
+  };
+
   return <main className="publisher">
     <header className="publisherHeader">
+      {canReturnToArticle && <button className="publisherBack" disabled={returning} onClick={() => void returnToArticle()}><ArrowLeft size={15} />{returning ? '正在返回…' : '返回原文章'}</button>}
       <div><strong>微信公众号发布</strong><small>大懒猫创作平台插件</small></div>
       <nav aria-label="插件导航">
         <button aria-current={page === 'publish' ? 'page' : undefined} onClick={() => void navigate('publish')}>文章发布</button>
         <button aria-current={page === 'settings' ? 'page' : undefined} onClick={() => void navigate('settings')}>账号设置</button>
       </nav>
       {page === 'publish' && <Suspense fallback={null}><ThemePicker /></Suspense>}
-      {(draft || page === 'settings') && <small role="status">{saveError ? '本地发布稿保存失败' : accountDirty ? '账号设置未保存' : page === 'settings' ? '账号设置已保存' : saved ? '本地发布稿已保存' : '正在保存本地发布稿…'}</small>}
+      {(draft || page === 'settings') && <small role="status" className={saveError ? 'error' : accountDirty ? 'dirty' : undefined}>{saveError ? '本地发布稿保存失败' : accountDirty ? '账号设置未保存' : page === 'settings' ? '账号设置已保存' : saved ? '本地发布稿已保存' : '正在保存本地发布稿…'}</small>}
       {saveError && <button onClick={() => void persist().catch(() => {})}>重试保存</button>}
     </header>
     {error && <p role="alert" className="settingsErr">{error}</p>}

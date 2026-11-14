@@ -25,6 +25,8 @@ export const WeChatMPPanel = forwardRef<WeChatMPPanelHandle, { onDirtyChange?: (
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
   const dirty = !!config && (appID.trim() !== config.app_id || !!appSecret.trim() || proxy.trim() !== (config.proxy_url || ''))
+  // 连接类操作依赖已保存的 AppSecret；按钮常驻显示（配置说明第 3 步指向它），未就绪时置灰并提示。
+  const secretReady = !!config?.secret_configured
 
   useEffect(() => { onDirtyChange?.(dirty) }, [dirty, onDirtyChange])
   useImperativeHandle(ref, () => ({ save: handleSave }))
@@ -192,28 +194,25 @@ export const WeChatMPPanel = forwardRef<WeChatMPPanelHandle, { onDirtyChange?: (
             <Save size={14} /> {saving ? t('wechatmp.saving') : t('wechatmp.save')}
           </button>
 
-          {config?.secret_configured && (
-            <button
-              type="button"
-              className="lbBtn"
-              onClick={handleTest}
-              disabled={testing || saving || dirty}
-            >
-              <TestTube2 size={14} /> {testing ? t('wechatmp.testing') : t('wechatmp.test')}
-            </button>
-          )}
+          <button
+            type="button"
+            className="lbBtn"
+            onClick={handleTest}
+            disabled={!secretReady || testing || saving || dirty}
+            title={secretReady ? undefined : t('wechatmp.needSecret')}
+          >
+            <TestTube2 size={14} /> {testing ? t('wechatmp.testing') : t('wechatmp.test')}
+          </button>
 
-          {config?.secret_configured && (
-            <button
-              type="button"
-              className="lbBtn"
-              onClick={handleDetectIP}
-              disabled={detectingIP || saving || dirty}
-            >
-              <Network size={14} /> {detectingIP ? t('wechatmp.detecting') : t('wechatmp.detect')}
-            </button>
-          )}
-        </div>
+          <button
+            type="button"
+            className="lbBtn"
+            onClick={handleDetectIP}
+            disabled={detectingIP || saving || dirty}
+            title={secretReady ? undefined : t('wechatmp.egressOnly')}
+          >
+            <Network size={14} /> {detectingIP ? t('wechatmp.detecting') : t('wechatmp.detect')}
+          </button>        </div>
 
         {config?.last_verified_at && (
           <div className="settingsOk">
@@ -252,10 +251,12 @@ export const WeChatMPPanel = forwardRef<WeChatMPPanelHandle, { onDirtyChange?: (
             <Globe size={14} /> {t('wechatmp.guide.openConsole')}
           </button>
         </div>
-        <p className="settingsHint">{t('wechatmp.guide.step1')}</p>
-        <p className="settingsHint">{t('wechatmp.guide.step2')}</p>
-        <p className="settingsHint">{t('wechatmp.guide.step3')}</p>
-        <p className="settingsHint">{t('wechatmp.guide.step4')}</p>
+        <div className="settingsSteps">
+          <p className="settingsHint">{t('wechatmp.guide.step1')}</p>
+          <p className="settingsHint">{t('wechatmp.guide.step2')}</p>
+          <p className="settingsHint">{t('wechatmp.guide.step3')}</p>
+          <p className="settingsHint">{t('wechatmp.guide.step4')}</p>
+        </div>
       </section>
     </div>
   )

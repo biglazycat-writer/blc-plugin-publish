@@ -17,6 +17,18 @@ export async function prepareImage(url:string,limit:number){
  for(const size of [2000,1600,1200,900,640])for(const quality of [85,70,55]){const out=await image.clone().resize({width:size,height:size,fit:'inside',withoutEnlargement:true}).flatten({background:'#ffffff'}).jpeg({quality}).toBuffer();if(out.length<=limit)return{data:out,mime:'image/jpeg'};}
  throw Error('图片压缩后仍超过微信接口限制');
 }
+export async function echoIP(proxy:string,signal:AbortSignal,endpoints:string[]=['https://myip.ipip.net','https://api.ipify.org','https://ifconfig.me/ip']){
+ if(proxy){const url=new URL(proxy);if(!['http:','https:'].includes(url.protocol)||url.username||url.password)throw Error('代理仅支持不含账号密码的 HTTP(S) 地址')}
+ const dispatcher=proxy?new ProxyAgent(proxy):undefined;
+ try{
+  for(const endpoint of endpoints){signal.throwIfAborted();
+   try{const r=await request(endpoint,{signal,dispatcher,redirect:'error',headers:{'user-agent':'blc-plugin-publish'}});if(!r.ok)continue;const text=(await r.text()).slice(0,4096);
+    const ip=(text.match(/(?:\d{1,3}\.){3}\d{1,3}/g)??[]).find((s:string)=>isIP(s));if(ip)return{ip,via_proxy:!!proxy};
+   }catch{signal.throwIfAborted()}
+  }
+  throw Error('未能获取出口 IP，请检查网络或插件代理设置');
+ }finally{void dispatcher?.close()}
+}
 export class WeChatClient {
  private tokenValue='';private expires=0;private fetching?:Promise<string>;private dispatcher?:ProxyAgent;
  constructor(private appID:string,private secret:string,private proxy='',private base='https://api.weixin.qq.com'){

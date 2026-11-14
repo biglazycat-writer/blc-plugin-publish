@@ -1,6 +1,6 @@
 import test from 'node:test';import assert from 'node:assert/strict';
-import {createServer} from 'node:http';import {mkdtemp,readFile,rm} from 'node:fs/promises';import os from 'node:os';import path from 'node:path';
-import sharp from 'sharp';import {WeChatClient,centeredCrop,prepareImage} from '../dist/wechat.js';import plugin from '../dist/main.js';
+import {createServer,request as httpRequest} from 'node:http';import {connect} from 'node:net';import {mkdtemp,readFile,rm} from 'node:fs/promises';import os from 'node:os';import path from 'node:path';
+import sharp from 'sharp';import {WeChatClient,centeredCrop,prepareImage,echoIP} from '../dist/wechat.js';import plugin from '../dist/main.js';
 const signal=()=>AbortSignal.timeout(10000);
 test('official API flow caches token, separates body/cover endpoints and preserves HTML',async t=>{
  let tokens=0,article,uploads=[];const secret='fixture-secret';
@@ -19,6 +19,19 @@ test('official API flow caches token, separates body/cover endpoints and preserv
  assert.equal((await client.materials(0,200,signal())).total_count,1);assert.equal(tokens,1);
 });
 test('cover crop bounds and image re-encoding',async()=>{assert.deepEqual(centeredCrop('1_1',400,200),{ratio:'1_1',x1:'.25'.replace(/^\./,'0.'),y1:'0',x2:'0.75',y2:'1'});assert.throws(()=>centeredCrop('other',1,1));const webp=await sharp({create:{width:200,height:100,channels:3,background:'#ffffff'}}).webp().toBuffer();const result=await prepareImage('data:image/webp;base64,'+webp.toString('base64'),1<<20);assert.equal(result.mime,'image/jpeg');assert.ok(result.data.length<1<<20)});
+test('egress IP fallback reads the first usable echo endpoint and honours the proxy flag',async t=>{
+ const good=createServer((req,res)=>{res.end('当前 IP：203.0.113.7 来自于：中国')});await new Promise(resolve=>good.listen(0,'127.0.0.1',resolve));t.after(()=>good.close());
+ const noise=createServer((req,res)=>{res.end('not an ip response')});await new Promise(resolve=>noise.listen(0,'127.0.0.1',resolve));t.after(()=>noise.close());
+ const proxy=createServer((req,res)=>{const upstream=httpRequest(req.url,remote=>{res.writeHead(remote.statusCode,remote.headers);remote.pipe(res)});upstream.on('error',()=>{res.writeHead(502).end()})});
+ // undici 的 ProxyAgent 通过 CONNECT 隧道转发请求，本地夹具需要实现同款握手。
+ proxy.on('connect',(req,clientSocket,head)=>{const [host,port]=req.url.split(':');const upstream=connect({host,port:Number(port||443)},()=>{clientSocket.write('HTTP/1.1 200 Connection Established\r\n\r\n');upstream.write(head);upstream.pipe(clientSocket);clientSocket.pipe(upstream)});upstream.on('error',()=>clientSocket.end())});
+ await new Promise(resolve=>proxy.listen(0,'127.0.0.1',resolve));t.after(()=>{proxy.closeAllConnections();proxy.close()});
+ const endpoints=[`http://127.0.0.1:${noise.address().port}`,`http://127.0.0.1:${good.address().port}`];
+ assert.deepEqual(await echoIP('',signal(),endpoints),{ip:'203.0.113.7',via_proxy:false});
+ assert.deepEqual(await echoIP(`http://127.0.0.1:${proxy.address().port}`,signal(),endpoints),{ip:'203.0.113.7',via_proxy:true});
+ await assert.rejects(echoIP('',signal(),['http://127.0.0.1:1']),/未能获取出口 IP/);
+ await assert.rejects(echoIP('socks5://127.0.0.1:1',signal(),endpoints),/代理仅支持/);
+});
 test('invalid draft fails before any network request',async()=>{const client=new WeChatClient('x','y');await assert.rejects(client.draft({title:'',content:'x'},signal()),/标题/);await assert.rejects(client.draft({title:'x',content:'x'},signal()),/封面/);client.close()});
 test('plugin credentials stay out of account files and transfer payloads are ordered',async()=>{
  const dir=await mkdtemp(path.join(os.tmpdir(),'blc-publish-'));const commands=new Map(),credentials=new Map();
