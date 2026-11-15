@@ -37,7 +37,8 @@ p code, li code { color: #111111; background: #ececec; border: none; border-radi
    而且字号/行高也跟着应用的兜底走。 */
 pre { background: #f2f2f2 !important; border: 2px solid #111111; border-radius: 0; color: #111111 !important; box-shadow: none; }
 pre code { color: #111111; }
-table { border-top: 3px solid #111111; border-bottom: 3px solid #111111; }
+/* 报刊表格走三线表：只有上下粗规线，左右不用外框（与内置主题保持一致）。 */
+table { border-top: 3px solid #111111; border-bottom: 3px solid #111111; border-left: none; border-right: none; }
 table th, table td { border: 1px solid #111111; color: #111111; }
 table th { background: #111111; color: #ffffff; font-weight: 700; }
 hr { border: none; border-top: 4px double #111111; margin: 1.4em 0; opacity: 1; }
