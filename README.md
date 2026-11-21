@@ -62,3 +62,7 @@ npm test           # 后台集成测试（本地模拟微信服务器）+ UI 单
 见 [CONTRIBUTING.md](CONTRIBUTING.md)，变更记录见 [CHANGELOG.md](CHANGELOG.md)。
 
 SDK 包 [blc-plugin-sdk](https://github.com/biglazycat-writer/blc-plugin-sdk) 为 MIT。本仓库其余部分的授权方式待维护者确认，请勿默认按开源许可证使用。
+
+## 配置使用入口
+
+在大懒猫创作平台的插件详情中，为插件声明的功能选择使用入口。功能数量、支持的位置与对应动作由本插件的 `contributes.features` 决定；用户可以多选、取消或恢复默认。开发声明见 SDK 的 [功能入口协议](https://github.com/biglazycat-writer/blc-plugin-sdk/blob/main/FEATURES.md)。

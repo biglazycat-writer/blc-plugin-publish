@@ -62,3 +62,7 @@ Official WeChat API (api.weixin.qq.com, optional HTTP(S) proxy)
 See [CONTRIBUTING.md](CONTRIBUTING.md) and [CHANGELOG.md](CHANGELOG.md).
 
 The [blc-plugin-sdk](https://github.com/biglazycat-writer/blc-plugin-sdk) package is MIT. Licensing for the rest of this repository is pending the maintainer's decision — do not assume the whole project is open source.
+
+## Choosing feature locations
+
+Open plugin details in BigLazyCat Creator to choose where each declared feature appears. This plugin defines its features and supported locations in `contributes.features`; users choose among those locations. See the SDK [feature reference](https://github.com/biglazycat-writer/blc-plugin-sdk/blob/main/FEATURES.md) for the declaration format.
