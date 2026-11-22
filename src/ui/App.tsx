@@ -136,7 +136,7 @@ function App() {
   return <main className="publisher">
     <header className="publisherHeader">
       {canReturnToArticle && <button className="publisherBack" disabled={returning} onClick={() => void returnToArticle()}><ArrowLeft size={15} />{returning ? '正在返回…' : '返回原文章'}</button>}
-      <div><strong>微信公众号发布</strong><small>大懒猫创作平台插件</small></div>
+      <div><strong>微信公众号发布</strong><small>大懒猫写作插件</small></div>
       <nav aria-label="插件导航">
         <button aria-current={page === 'publish' ? 'page' : undefined} onClick={() => void navigate('publish')}>文章发布</button>
         <button aria-current={page === 'settings' ? 'page' : undefined} onClick={() => void navigate('settings')}>账号设置</button>

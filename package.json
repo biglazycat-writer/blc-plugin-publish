@@ -176,7 +176,7 @@
   },
   "type": "module",
   "version": "0.2.3",
-  "description": "大懒猫创作平台微信公众号发布插件",
+  "description": "大懒猫写作微信公众号发布插件",
   "files": [
     "dist",
     "README.md",

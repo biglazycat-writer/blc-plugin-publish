@@ -1,8 +1,8 @@
 # WeChat Publishing (blc-plugin-publish)
 
-A BigLazyCat Creator plugin that formats Markdown into WeChat-compatible articles and delivers them to the Official Account draft box through the official WeChat API. Final publication is always confirmed manually in the WeChat console — the plugin never broadcasts or publishes publicly.
+A BigLazyCat Writer plugin that formats Markdown into WeChat-compatible articles and delivers them to the Official Account draft box through the official WeChat API. Final publication is always confirmed manually in the WeChat console — the plugin never broadcasts or publishes publicly.
 
-Requires BigLazyCat Creator **0.4.5 or newer** (plugin API 1, revision 3). The account must be WeChat-verified, with the egress IP on the allowlist.
+Requires BigLazyCat Writer **0.4.5 or newer** (plugin API 1, revision 3). The account must be WeChat-verified, with the egress IP on the allowlist.
 
 ## Highlights
 
@@ -65,4 +65,4 @@ The [blc-plugin-sdk](https://github.com/biglazycat-writer/blc-plugin-sdk) packag
 
 ## Choosing feature locations
 
-Open plugin details in BigLazyCat Creator to choose where each declared feature appears. This plugin defines its features and supported locations in `contributes.features`; users choose among those locations. See the SDK [feature reference](https://github.com/biglazycat-writer/blc-plugin-sdk/blob/main/FEATURES.md) for the declaration format.
+Open plugin details in BigLazyCat Writer to choose where each declared feature appears. This plugin defines its features and supported locations in `contributes.features`; users choose among those locations. See the SDK [feature reference](https://github.com/biglazycat-writer/blc-plugin-sdk/blob/main/FEATURES.md) for the declaration format.

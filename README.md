@@ -1,8 +1,8 @@
 # 微信公众号发布（blc-plugin-publish）
 
-大懒猫创作平台的微信公众号发布插件：把 Markdown 排版成微信图文，通过公众号官方接口送进草稿箱。最终发表由作者在公众号后台人工确认，插件不群发、不公开发表。
+大懒猫写作的微信公众号发布插件：把 Markdown 排版成微信图文，通过公众号官方接口送进草稿箱。最终发表由作者在公众号后台人工确认，插件不群发、不公开发表。
 
-需要大懒猫创作平台 **0.4.5 及以上**（插件 API 1 修订 3）。公众号需完成微信认证，且出口 IP 在白名单内。
+需要大懒猫写作 **0.4.5 及以上**（插件 API 1 修订 3）。公众号需完成微信认证，且出口 IP 在白名单内。
 
 ## 功能亮点
 
@@ -65,4 +65,4 @@ SDK 包 [blc-plugin-sdk](https://github.com/biglazycat-writer/blc-plugin-sdk) �
 
 ## 配置使用入口
 
-在大懒猫创作平台的插件详情中，为插件声明的功能选择使用入口。功能数量、支持的位置与对应动作由本插件的 `contributes.features` 决定；用户可以多选、取消或恢复默认。开发声明见 SDK 的 [功能入口协议](https://github.com/biglazycat-writer/blc-plugin-sdk/blob/main/FEATURES.md)。
+在大懒猫写作的插件详情中，为插件声明的功能选择使用入口。功能数量、支持的位置与对应动作由本插件的 `contributes.features` 决定；用户可以多选、取消或恢复默认。开发声明见 SDK 的 [功能入口协议](https://github.com/biglazycat-writer/blc-plugin-sdk/blob/main/FEATURES.md)。

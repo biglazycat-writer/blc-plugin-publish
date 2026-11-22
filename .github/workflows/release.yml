@@ -117,7 +117,7 @@ jobs:
             echo "Creating Release $TAG."
             gh release create "$TAG" \
               blc-plugin-publish-*.tgz blc-plugin-publish-*.tgz.sha256 \
-              --title "微信公众号发布 $TAG · 大懒猫创作平台" \
+              --title "微信公众号发布 $TAG · 大懒猫写作" \
               --notes-file "$NOTES"
           fi
           gh release view "$TAG" --json tagName,url,assets
