@@ -1,5 +1,7 @@
 # WeChat Publishing (blc-plugin-publish)
 
+[简体中文](README.md) | **English**
+
 A BigLazyCat Writer plugin that formats Markdown into WeChat-compatible articles and delivers them to the Official Account draft box through the official WeChat API. Final publication is always confirmed manually in the WeChat console — the plugin never broadcasts or publishes publicly.
 
 Requires BigLazyCat Writer **0.4.5 or newer** (plugin API 1, revision 3). The account must be WeChat-verified, with the egress IP on the allowlist.
