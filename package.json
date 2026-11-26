@@ -123,6 +123,7 @@
     },
     "description": "文章排版、图片与封面处理、素材库和官方 API 草稿发布。",
     "displayName": "微信公众号发布",
+    "icon": "lucide:send",
     "main": "dist/main.js",
     "mainView": "publish",
     "platforms": [
@@ -134,7 +135,7 @@
       "linux/arm64"
     ],
     "settingsView": "settings",
-    "minimumApiRevision": 7
+    "minimumApiRevision": 8
   },
   "dependencies": {
     "@tiptap/core": "3.32.1",
@@ -165,7 +166,7 @@
   },
   "engines": {
     "node": ">=22.23.3 <23.0.0",
-    "biglazycat": ">=0.4.10"
+    "biglazycat": ">=0.4.11"
   },
   "name": "blc-plugin-publish",
   "private": true,
@@ -175,7 +176,7 @@
     "test": "node --test tests/*.test.mjs && vitest run"
   },
   "type": "module",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "description": "大懒猫写作微信公众号发布插件",
   "files": [
     "dist",
